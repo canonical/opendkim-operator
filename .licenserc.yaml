@@ -24,4 +24,5 @@ header:
     - 'pyproject.toml'
     - 'zap_rules.tsv'
     - '**/*.md.j2'
+    - '**/lib/charms/**'
   comment: on-failure
