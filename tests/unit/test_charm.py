@@ -28,4 +28,6 @@ def test_install(monkeypatch):
     state = ops.testing.State(**base_state)
     out = context.run(context.on.install(), state)
     add_package_mock.assert_called()
+    assert len(out.opened_ports) == 1
+    assert list(out.opened_ports)[0].port == 8892
     assert out.unit_status == ops.testing.ActiveStatus("")
