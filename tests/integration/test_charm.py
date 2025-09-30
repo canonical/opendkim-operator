@@ -8,3 +8,7 @@
 import logging
 
 logger = logging.getLogger(__name__)
+
+
+def test_dummy_test():
+    """Dummy integration test."""

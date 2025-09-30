@@ -12,3 +12,4 @@ jobs:
       juju-channel: 3/stable
       self-hosted-runner: true
       self-hosted-runner-label: "edge"
+      modules: '["test_charm.py"]'
