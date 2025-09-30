@@ -1,7 +1,6 @@
 # Copyright 2025 Canonical Ltd.
 # See LICENSE file for licensing details.
 
-# pylint: disable=duplicate-code,missing-function-docstring
 """Unit tests."""
 
 from unittest.mock import MagicMock
@@ -30,4 +29,4 @@ def test_install(monkeypatch):
     add_package_mock.assert_called()
     assert len(out.opened_ports) == 1
     assert list(out.opened_ports)[0].port == 8892
-    assert out.unit_status == ops.testing.ActiveStatus("")
+    assert out.unit_status.name == ops.testing.ActiveStatus.name

@@ -27,44 +27,6 @@ parts:
     plugin: charm
     source: .
 
-config:
-  options:
-    domains:
-      type: string
-      default: '- "*"'
-      description: |
-        YAML list of sender domain(s) to sign
-        messages for (default '*' will sign messages for all domains).
-    keytable:
-      type: string
-      default: ''
-      description: |
-        Key table mapping.
-    mode:
-      type: string
-      default: 'sv'
-      description: |
-        Selects operating modes. The string is a concatenation of
-        characters that indicate which mode(s) of operation are
-        desired. Valid modes are s (signer) and v (verifier). The
-        default is sv
-  
-        See http://www.opendkim.org/opendkim.conf.5.html
-    selector:
-      type: string
-      default: 'mail'
-      description: |
-        Selector to use when signing messages with DKIM.
-    signingtable:
-      type: string
-      default: ''
-      description: |
-        Signing table mapping.
-    private-keys:
-      type: secret
-      description: |
-        Dictionary with key names and the private keys.
-
 provides:
   milter:
     interface: milter
