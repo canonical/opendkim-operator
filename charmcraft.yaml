@@ -6,7 +6,6 @@ name: opendkim
 title: OpenDKIM charm.
 summary: Open source milter for providing DKIM service
 links:
-  documentation: https://discourse.charmhub.io
   issues: https://github.com/canonical/opendkim-operator/issues
   source: https://github.com/canonical/opendkim-operator
   contact: https://launchpad.net/~canonical-is-devops
