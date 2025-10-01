@@ -31,8 +31,34 @@ provides:
     interface: milter
 
 assumes:
-  - juju >= 3.3
+  - juju >= 3.4
 
 charm-libs:
 - lib: operator_libs_linux.apt
   version: '0'
+- lib: operator_libs_linux.systemd
+  version: '1'
+
+config:
+  options:
+    signingtable:
+      type: string
+      description: Signing table mapping.
+    keytable:
+      type: string
+      description: |
+        Key table mapping.
+    private-keys:
+      type: secret
+      description: |
+        Dictionary of private key pairs. The key is the filename.
+    mode:
+      type: string
+      default: 'sv'
+      description: |
+        Selects operating modes. The string is a concatenation of
+        characters that indicate which mode(s) of operation are
+        desired. Valid modes are s (signer) and v (verifier). The
+        default is sv
+
+        See http://www.opendkim.org/opendkim.conf.5.html

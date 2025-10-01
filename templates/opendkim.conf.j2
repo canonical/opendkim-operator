@@ -13,25 +13,20 @@ LogWhy yes
 
 {%- if signing_mode %}
 
-Domain {{domains}}
-KeyFile {{keyfile}}
-Selector {{selector}}
-{%- if keytable != ''%}
-KeyTable file:{{keytable}}
-{%- endif %}
-{%- if signingtable != ''%}
-SigningTable refile:{{signingtable}}
-{%- endif %}
-Canonicalization {{canonicalization}}
-SignHeaders {{signheaders}}
+KeyTable file:{{ keytable_path }}
+SigningTable refile:{{ signingtable_path }}
+Canonicalization {{ canonicalization }}
+SignHeaders {{ signheaders }}
+
 {%- endif %}
 
 {%- if mode != 'sv' %}
 
-Mode {{mode}}
+Mode {{ mode }}
+
 {%- endif %}
 
 TrustAnchorFile /usr/share/dns/root.key
 
-InternalHosts {{internalhosts}}
+InternalHosts {{ internalhosts }}
 
