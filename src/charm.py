@@ -31,6 +31,8 @@ OPENDKIM_KEYS_PATH = Path("/etc/dkimkeys")
 OPENDKIM_SIGNINGTABLE_PATH = OPENDKIM_KEYS_PATH / "signingtable"
 OPENDKIM_KEYTABLE_PATH = OPENDKIM_KEYS_PATH / "keytable"
 
+MILTER_RELATION_NAME = "milter"
+
 # https://datatracker.ietf.org/doc/html/rfc6376#section-5.4
 DEFAULT_SIGN_HEADERS = (
     "From,Reply-To,Subject,Date,To,Cc"
@@ -58,12 +60,17 @@ class OpenDKIMCharm(ops.CharmBase):
         self.framework.observe(self.on.upgrade_charm, self._install)
         self.framework.observe(self.on.config_changed, self._reconcile)
         self.framework.observe(self.on.secret_changed, self._reconcile)
+        self.framework.observe(self.on[MILTER_RELATION_NAME].relation_changed, self._reconcile)
+        self.framework.observe(self.on[MILTER_RELATION_NAME].relation_departed, self._reconcile)
+        self.framework.observe(self.on[MILTER_RELATION_NAME].relation_broken, self._reconcile)
+        self.framework.observe(self.on[MILTER_RELATION_NAME].relation_joined, self._reconcile)
         self.unit.open_port("tcp", OPENDKIM_MILTER_PORT)
 
     def _install(self, _: ops.EventBase) -> None:
         """Install opendkim package."""
         self.unit.status = ops.MaintenanceStatus("installing opendkim")
         apt.add_package(package_names=OPENDKIM_PACKAGE_NAME, update_cache=True)
+        # JAVI log rotation?
         self.unit.status = ops.ActiveStatus()
 
     def _reconcile(self, _: ops.EventBase) -> None:
@@ -87,6 +94,12 @@ class OpenDKIMCharm(ops.CharmBase):
         )
 
         # JAVI validate here anything else?
+        milter_relations = self.model.relations.get(MILTER_RELATION_NAME)
+        if not milter_relations:
+            self.unit.status = ops.WaitingStatus("waiting for milter relations")
+            return
+        for milter_relation in milter_relations:
+            milter_relation.data[self.model.unit]["port"] = str(OPENDKIM_MILTER_PORT)
 
         # At this point, render all required files.
         for keyname, keyvalue in config.private_keys.items():
@@ -103,6 +116,7 @@ class OpenDKIMCharm(ops.CharmBase):
         rendered = template.render(context)
         render_file(OPENDKIM_CONFIG_PATH, rendered, 0o644)
         systemd.service_reload("opendkim")
+
         self.unit.status = ops.ActiveStatus()
 
 

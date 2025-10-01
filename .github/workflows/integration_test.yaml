@@ -8,8 +8,10 @@ jobs:
     uses: canonical/operator-workflows/.github/workflows/integration_test.yaml@main
     secrets: inherit
     with:
-      provider: lxd
+      extra-arguments: '-x --log-format="%(asctime)s %(levelname)s %(message)s"'
       juju-channel: 3/stable
-      self-hosted-runner: true
-      self-hosted-runner-label: "edge"
       modules: '["test_charm.py"]'
+      pre-run-script: ./tests/integration/setup-integration-tests.sh
+      provider: lxd
+      self-hosted-runner-label: "edge"
+      self-hosted-runner: true

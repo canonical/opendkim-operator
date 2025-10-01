@@ -81,6 +81,10 @@ def test_blocked_charm(signingtable, keytable, private_keys, error_messages):
         assert error_message in out.unit_status.message
 
 
+# JAVI
+# def test_relation_changed(monkeypatch): ??
+
+
 def test_basic_config(monkeypatch):
     """
     arrange: TODO.
@@ -104,6 +108,14 @@ def test_basic_config(monkeypatch):
     signingtable = '[["*@example.com", "selector._domainkey.example.com"]]'
     private_keys = {keyname: "PRIVATEKEY"}
     secret_id = token_hex(20)[:20]
+
+    milter_relation = ops.testing.Relation(
+        id=1,
+        endpoint="milter",
+        interface="milter",
+        remote_app_data={},
+        remote_app_name="smtp-relay",
+    )
     base_state: dict[str, typing.Any] = {
         "config": {
             "keytable": keytable,
@@ -111,11 +123,15 @@ def test_basic_config(monkeypatch):
             "private-keys": f"secret:{secret_id}",
         },
         "secrets": {ops.testing.Secret(id=secret_id, tracked_content=private_keys)},
+        "relations": [milter_relation],
     }
     state = ops.testing.State(**base_state)
     out = context.run(context.on.config_changed(), state)
 
     assert out.unit_status.name == ops.testing.ActiveStatus.name
+
+    # JAVI maybe test with two relations? is this what we want?
+    assert list(out.relations)[0].local_unit_data["port"] == "8892"
     systemd_reload_mock.assert_called_with("opendkim")
     # There must be 4 calls to render_file.
     assert render_file_mock.call_count == 4
