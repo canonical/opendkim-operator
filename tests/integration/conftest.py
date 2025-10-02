@@ -10,8 +10,8 @@ import jubilant
 import pytest
 
 
-@pytest.fixture(scope="module", name="smtp_dkim_signing_charm")
-def smtp_dkim_signing_charm_fixture(pytestconfig: pytest.Config):
+@pytest.fixture(scope="module", name="opendkim_charm")
+def opendkim_charm_fixture(pytestconfig: pytest.Config):
     """Get value from parameter charm-file."""
     charm = pytestconfig.getoption("--charm-file")
     use_existing = pytestconfig.getoption("--use-existing", default=False)
@@ -20,30 +20,30 @@ def smtp_dkim_signing_charm_fixture(pytestconfig: pytest.Config):
     return charm
 
 
-@pytest.fixture(scope="module", name="smtp_dkim_signing_app")
-def deploy_smtp_dkim_signing_fixture(
-    smtp_dkim_signing_charm: str,
+@pytest.fixture(scope="module", name="opendkim_app")
+def deploy_opendkim_fixture(
+    opendkim_charm: str,
     juju: jubilant.Juju,
 ) -> str:
-    """Deploy smtp-dkim-signing."""
-    deploy_smtp_dkim_signing_name = "smtp-dkim-signing"
+    """Deploy opendkim."""
+    deploy_opendkim_name = "opendkim"
 
-    if not juju.status().apps.get(deploy_smtp_dkim_signing_name):
+    if not juju.status().apps.get(deploy_opendkim_name):
         juju.deploy(
-            f"./{smtp_dkim_signing_charm}",
-            deploy_smtp_dkim_signing_name,
+            f"./{opendkim_charm}",
+            deploy_opendkim_name,
         )
-    juju.wait(
-        lambda status: status.apps[deploy_smtp_dkim_signing_name].is_active,
-        error=jubilant.any_blocked,
-        timeout=10 * 60,
-    )
-    return deploy_smtp_dkim_signing_name
+        # It is blocked because it is not configured here.
+        juju.wait(
+            lambda status: status.apps[deploy_opendkim_name].is_blocked,
+            timeout=10 * 60,
+        )
+    return deploy_opendkim_name
 
 
 @pytest.fixture(scope="module", name="smtp_relay_app")
 def deploy_smtp_relay_fixture(
-    smtp_dkim_signing_app: str,
+    opendkim_app: str,
     juju: jubilant.Juju,
 ) -> str:
     """Deploy smtp-relay and integrate with dkim."""
@@ -51,12 +51,12 @@ def deploy_smtp_relay_fixture(
 
     if not juju.status().apps.get(smtp_relay_app_name):
         juju.deploy(smtp_relay_app_name, smtp_relay_app_name)
-        juju.integrate(smtp_relay_app_name, smtp_dkim_signing_app)
-    juju.wait(
-        lambda status: jubilant.all_active(status, smtp_relay_app_name, smtp_dkim_signing_app),
-        error=jubilant.any_blocked,
-        timeout=10 * 60,
-    )
+        juju.integrate(smtp_relay_app_name, opendkim_app)
+        juju.wait(
+            lambda status: jubilant.all_active(status, smtp_relay_app_name)
+            and jubilant.all_blocked(status, opendkim_app),
+            timeout=10 * 60,
+        )
     return smtp_relay_app_name
 
 

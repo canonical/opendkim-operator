@@ -8,6 +8,7 @@
 # pylint: disable=too-many-arguments,too-many-locals
 
 
+import json
 import logging
 import pathlib
 import smtplib
@@ -60,8 +61,8 @@ def machine_ip_address_fixture() -> str:
 
 
 @pytest.mark.abort_on_fail
-def test_simple_relay_dkim(
-    juju: jubilant.Juju, smtp_dkim_signing_app, smtp_relay_app, machine_ip_address
+def test_simple_opendkim(
+    juju: jubilant.Juju, opendkim_app, smtp_relay_app, machine_ip_address
 ):
     """
     arrange: Deploy smtp-relay charm with the testrelay.internal domain in relay domains.
@@ -74,28 +75,30 @@ def test_simple_relay_dkim(
 
     domain = "testrelay.internal"
     selector = "default"
+    keyname = "testrelay-internal-default"
     _, private_key = generate_opendkim_genkey(domain=domain, selector=selector)
 
-    # dkim_unit = list(status.apps[smtp_dkim_signing_app].units.keys())[0]
-    # with tempfile.NamedTemporaryFile(dir=".") as tf:
-    #     tf.write(private_key.encode("utf-8"))
-    #     tf.flush()
-    #     juju.scp(tf.name, f"{dkim_unit}:/tmp/{domain}-{selector}.private")
-    #     juju.exec(
-    #         f"mv /tmp/{domain}-{selector}.private /etc/dkimkeys/;"
-    #         "chown -R opendkim: /etc/dkimkeys/;"
-    #         "chmod -R go-rwx /etc/dkimkeys/",
-    #         unit=dkim_unit,
-    #     )
+    try:
+        secret_id = juju.add_secret("thekeys", {f"{keyname}": private_key})
+    except jubilant.CLIError as e:
+        secret_info = juju.show_secret("thekeys")
+        secret_id = secret_info.uri
+        if "already exists" in e.stderr:
+            juju.update_secret("thekeys", {f"{keyname}": private_key})
+        else:
+            logger.error("Error adding secret %s %s", e.stderr, e.stdout)
+            raise e
 
-    secret_id = juju.add_secret("thekeys", {f"{domain}-{selector}": private_key})
-    juju.cli("grant-secret", secret_id, smtp_dkim_signing_app)
+    juju.cli("grant-secret", secret_id, opendkim_app)
+    keytable = [
+        [f"{selector}._domainkey.{domain}", f"{domain}:{selector}:/etc/dkimkeys/{keyname}.private"]
+    ]
+    signingtable = [[f"*@{domain}", f"{selector}._domainkey.{domain}"]]
     juju.config(
-        smtp_dkim_signing_app,
+        opendkim_app,
         {
-            "keytable": f"{selector}._domainkey.{domain} "
-            f"{domain}:{selector}:/etc/dkimkeys/{domain}-{selector}.private",
-            "signingtable": f"*@{domain} {selector}._domainkey.{domain}",
+            "keytable": json.dumps(keytable),
+            "signingtable": json.dumps(signingtable),
             "private-keys": secret_id,
         },
     )
@@ -106,8 +109,7 @@ def test_simple_relay_dkim(
     juju.config(smtp_relay_app, {"relay_domains": f"- {domain}"})
     juju.wait(
         lambda status: status.apps[smtp_relay_app].is_active,
-        error=jubilant.any_blocked,
-        timeout=6 * 60,
+        timeout=3 * 60,
         delay=5,
     )
 

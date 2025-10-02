@@ -9,6 +9,7 @@
 
 import logging
 import os
+import pwd
 import typing
 from pathlib import Path
 from typing import Optional, cast
@@ -30,6 +31,7 @@ OPENDKIM_CONFIG_PATH = Path("/etc/opendkim.conf")
 OPENDKIM_KEYS_PATH = Path("/etc/dkimkeys")
 OPENDKIM_SIGNINGTABLE_PATH = OPENDKIM_KEYS_PATH / "signingtable"
 OPENDKIM_KEYTABLE_PATH = OPENDKIM_KEYS_PATH / "keytable"
+OPENDKIM_USER = "opendkim"
 
 MILTER_RELATION_NAME = "milter"
 
@@ -115,7 +117,12 @@ class OpenDKIMCharm(ops.CharmBase):
         template = env.get_template(str(OPENDKIM_CONFIG_TEMPLATE))
         rendered = template.render(context)
         render_file(OPENDKIM_CONFIG_PATH, rendered, 0o644)
-        systemd.service_reload("opendkim")
+
+        logger.info("Reload opendkim")
+        # systemd.service_reload("opendkim")
+        # JAVI When is reload needed and when is restart needed?
+        # At least the first time we write the file (for the Socket) a restart is needed.
+        systemd.service_restart("opendkim")
 
         self.unit.status = ops.ActiveStatus()
 
@@ -200,7 +207,7 @@ class OpenDKIMConfig(BaseModel):
             raise InvalidCharmConfigError(f"Wrong config options: {error_field_str}") from exc
 
 
-def render_file(path: Path, content: str, mode: int) -> None:
+def render_file(path: Path, content: str, mode: int, user: str = OPENDKIM_USER) -> None:
     """Write a content rendered from a template to a file.
 
     Args:
@@ -208,9 +215,12 @@ def render_file(path: Path, content: str, mode: int) -> None:
         content: the data to be written to the file.
         mode: access permission mask applied to the
             file using chmod (e.g. 0o640).
+        user: The user that will own the file.
     """
     path.write_text(content, encoding="utf-8")
     os.chmod(path, mode)
+    u = pwd.getpwnam(user)
+    os.chown(path, uid=u.pw_uid, gid=u.pw_gid)
 
 
 def get_invalid_config_fields(exc: ValidationError) -> list[str]:

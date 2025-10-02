@@ -3,6 +3,7 @@
 
 """Unit tests."""
 
+import getpass
 import os
 import tempfile
 import typing
@@ -93,6 +94,8 @@ def test_basic_config(monkeypatch):
     """
     systemd_reload_mock = MagicMock()
     monkeypatch.setattr("charm.systemd.service_reload", systemd_reload_mock)
+    systemd_restart_mock = MagicMock()
+    monkeypatch.setattr("charm.systemd.service_restart", systemd_restart_mock)
 
     render_file_mock = MagicMock()
     monkeypatch.setattr("charm.render_file", render_file_mock)
@@ -132,7 +135,8 @@ def test_basic_config(monkeypatch):
 
     # JAVI maybe test with two relations? is this what we want?
     assert list(out.relations)[0].local_unit_data["port"] == "8892"
-    systemd_reload_mock.assert_called_with("opendkim")
+    # systemd_reload_mock.assert_called_with("opendkim")
+    systemd_restart_mock.assert_called_with("opendkim")
     # There must be 4 calls to render_file.
     assert render_file_mock.call_count == 4
     expected_opendkim_conf = (Path(__file__).parent / "files/opendkim.conf").read_text()
@@ -155,10 +159,11 @@ def test_render_file():
     act: TODO.
     assert: TODO.
     """
+    user = getpass.getuser()
     with tempfile.TemporaryDirectory() as tmpdir:
         content = "any text"
         path = Path(tmpdir) / "onefile.txt"
-        render_file(path, content, 0o666)
+        render_file(path, content, 0o666, user=user)
         st = os.stat(str(path))
         assert oct(st.st_mode) == "0o100666"
         assert path.read_text() == content
