@@ -9,7 +9,7 @@ import tempfile
 import typing
 from pathlib import Path
 from secrets import token_hex
-from unittest.mock import MagicMock
+from unittest.mock import ANY, MagicMock
 
 import ops
 import ops.testing
@@ -27,13 +27,18 @@ def test_install(monkeypatch):
     add_package_mock = MagicMock()
     monkeypatch.setattr("charm.apt.add_package", add_package_mock)
 
+    render_file_mock = MagicMock()
+    monkeypatch.setattr("charm.render_file", render_file_mock)
+    update_logrotate_conf_mock = MagicMock()
+    monkeypatch.setattr("utils.update_logrotate_conf", update_logrotate_conf_mock)
+
     context = ops.testing.Context(
         charm_type=OpenDKIMCharm,
     )
     base_state: dict[str, str] = {}
     state = ops.testing.State(**base_state)
     out = context.run(context.on.install(), state)
-    add_package_mock.assert_called()
+    render_file_mock.assert_called_with(Path("/etc/logrotate.d/rsyslog"), ANY, 0o644, user="root")
     assert len(out.opened_ports) == 1
     assert list(out.opened_ports)[0].port == 8892
     assert out.unit_status.name == ops.testing.ActiveStatus.name
@@ -83,6 +88,14 @@ def test_blocked_charm(signingtable, keytable, private_keys, error_messages):
 
 
 # JAVI
+# def test_blocked_validation_failed(monkeypatch): ??
+
+
+# JAVI
+# def test_blocked_validation_failed(monkeypatch): ??
+
+
+# JAVI
 # def test_relation_changed(monkeypatch): ??
 
 
@@ -92,6 +105,8 @@ def test_basic_config(monkeypatch):
     act: TODO.
     assert: TODO.
     """
+    monkeypatch.setattr("charm.read_text", MagicMock(return_value=""))
+    monkeypatch.setattr("charm.validate_opendkim", MagicMock(return_value=None))
     systemd_reload_mock = MagicMock()
     monkeypatch.setattr("charm.systemd.service_reload", systemd_reload_mock)
     systemd_restart_mock = MagicMock()

@@ -10,6 +10,7 @@
 import logging
 import os
 import pwd
+import subprocess  # nosec B404
 import typing
 from pathlib import Path
 from typing import Optional, cast
@@ -21,17 +22,22 @@ from charms.operator_libs_linux.v1 import systemd
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from pydantic import BaseModel, ValidationError, computed_field
 
+import utils
+
 logger = logging.getLogger(__name__)
 
 OPENDKIM_PACKAGE_NAME = "opendkim"
 OPENDKIM_MILTER_PORT = 8892
 OPENDKIM_CONFIG_TEMPLATE = Path("opendkim.conf.j2")
 OPENDKIM_CONFIG_PATH = Path("/etc/opendkim.conf")
-OPENDKIM_CONFIG_PATH = Path("/etc/opendkim.conf")
 OPENDKIM_KEYS_PATH = Path("/etc/dkimkeys")
 OPENDKIM_SIGNINGTABLE_PATH = OPENDKIM_KEYS_PATH / "signingtable"
 OPENDKIM_KEYTABLE_PATH = OPENDKIM_KEYS_PATH / "keytable"
 OPENDKIM_USER = "opendkim"
+
+LOG_ROTATE_SYSLOG = Path("/etc/logrotate.d/rsyslog")
+LOG_RETENTION_DAYS = 120
+
 
 MILTER_RELATION_NAME = "milter"
 
@@ -73,6 +79,10 @@ class OpenDKIMCharm(ops.CharmBase):
         self.unit.status = ops.MaintenanceStatus("installing opendkim")
         apt.add_package(package_names=OPENDKIM_PACKAGE_NAME, update_cache=True)
         # JAVI log rotation?
+        rotate_content = utils.update_logrotate_conf(
+            str(LOG_ROTATE_SYSLOG), frequency="daily", retention=LOG_RETENTION_DAYS
+        )
+        render_file(LOG_ROTATE_SYSLOG, rotate_content, 0o644, user="root")
         self.unit.status = ops.ActiveStatus()
 
     def _reconcile(self, _: ops.EventBase) -> None:
@@ -84,9 +94,14 @@ class OpenDKIMCharm(ops.CharmBase):
             self.unit.status = ops.BlockedStatus(str(exc))
             return
 
-        # Jinja2 context
+        milter_relations = self.model.relations.get(MILTER_RELATION_NAME)
+        if not milter_relations:
+            self.unit.status = ops.WaitingStatus("waiting for milter relations")
+            return
+        for milter_relation in milter_relations:
+            milter_relation.data[self.model.unit]["port"] = str(OPENDKIM_MILTER_PORT)
+
         context = config.model_dump()
-        logger.info("Javi context %s", context)
         env = Environment(
             loader=FileSystemLoader("templates"),
             autoescape=select_autoescape(),
@@ -95,15 +110,6 @@ class OpenDKIMCharm(ops.CharmBase):
             lstrip_blocks=True,
         )
 
-        # JAVI validate here anything else?
-        milter_relations = self.model.relations.get(MILTER_RELATION_NAME)
-        if not milter_relations:
-            self.unit.status = ops.WaitingStatus("waiting for milter relations")
-            return
-        for milter_relation in milter_relations:
-            milter_relation.data[self.model.unit]["port"] = str(OPENDKIM_MILTER_PORT)
-
-        # At this point, render all required files.
         for keyname, keyvalue in config.private_keys.items():
             keyfile = OPENDKIM_KEYS_PATH / f"{keyname}.private"
             render_file(keyfile, keyvalue, 0o600)
@@ -116,14 +122,21 @@ class OpenDKIMCharm(ops.CharmBase):
 
         template = env.get_template(str(OPENDKIM_CONFIG_TEMPLATE))
         rendered = template.render(context)
-        render_file(OPENDKIM_CONFIG_PATH, rendered, 0o644)
+
+        previous_rendered = read_text(OPENDKIM_CONFIG_PATH)
+        if rendered != previous_rendered:
+            render_file(OPENDKIM_CONFIG_PATH, rendered, 0o644)
+            logger.info("Restart opendkim")
+            systemd.service_restart("opendkim")
 
         logger.info("Reload opendkim")
-        # systemd.service_reload("opendkim")
-        # JAVI When is reload needed and when is restart needed?
-        # At least the first time we write the file (for the Socket) a restart is needed.
-        systemd.service_restart("opendkim")
+        systemd.service_reload("opendkim")
 
+        try:
+            validate_opendkim()
+        except ValueError as exc:
+            self.unit.status = ops.BlockedStatus(str(exc))
+            return
         self.unit.status = ops.ActiveStatus()
 
 
@@ -163,7 +176,7 @@ class OpenDKIMConfig(BaseModel):
         return "s" in self.mode
 
     @classmethod
-    def from_charm(cls, charm: OpenDKIMCharm) -> "OpenDKIMConfig":
+    def from_charm(cls, charm: OpenDKIMCharm) -> typing.Self:
         """TODO.
 
         Args:
@@ -205,6 +218,36 @@ class OpenDKIMConfig(BaseModel):
             logger.error(str(exc))
             error_field_str = ",".join(f"{field}" for field in get_invalid_config_fields(exc))
             raise InvalidCharmConfigError(f"Wrong config options: {error_field_str}") from exc
+
+
+def validate_opendkim() -> None:
+    """TODO.
+
+    Raises:
+       ValueError: TODO
+    """
+    # JAVI VALIDATE WITH:
+    try:
+        subprocess.run(
+            ["opendkim-testkey", "-x", OPENDKIM_CONFIG_PATH, "-vv"], timeout=100, check=True
+        )
+    except (subprocess.CalledProcessError, TimeoutError) as exc:
+        logger.exception("Error validating with opendkim-testkey")
+        raise ValueError("Wrong opendkim configuration. See logs") from exc
+
+
+def read_text(path: Path) -> str:
+    """TODO.
+
+    Args:
+        path: TODO
+
+    Returns: TODO
+    """
+    try:
+        return path.read_text()
+    except FileNotFoundError:
+        return ""
 
 
 def render_file(path: Path, content: str, mode: int, user: str = OPENDKIM_USER) -> None:
