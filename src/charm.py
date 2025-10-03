@@ -98,15 +98,6 @@ class OpenDKIMCharm(ops.CharmBase):
         for milter_relation in milter_relations:
             milter_relation.data[self.model.unit]["port"] = str(OPENDKIM_MILTER_PORT)
 
-        context = config.model_dump()
-        env = Environment(
-            loader=FileSystemLoader("templates"),
-            autoescape=select_autoescape(),
-            keep_trailing_newline=True,
-            trim_blocks=True,
-            lstrip_blocks=True,
-        )
-
         for keyname, keyvalue in config.private_keys.items():
             keyfile = OPENDKIM_KEYS_PATH / f"{keyname}.private"
             render_file(keyfile, keyvalue, 0o600)
@@ -117,6 +108,14 @@ class OpenDKIMCharm(ops.CharmBase):
         keytable = "\n".join(" ".join(row) for row in config.keytable)
         render_file(OPENDKIM_KEYTABLE_PATH, keytable, 0o644)
 
+        context = config.model_dump()
+        env = Environment(
+            loader=FileSystemLoader("templates"),
+            autoescape=select_autoescape(),
+            keep_trailing_newline=True,
+            trim_blocks=True,
+            lstrip_blocks=True,
+        )
         template = env.get_template(str(OPENDKIM_CONFIG_TEMPLATE))
         rendered = template.render(context)
 

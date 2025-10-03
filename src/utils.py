@@ -14,13 +14,13 @@ def update_logrotate_conf(
     """Update existing logrotate config with log retention settings.
 
     Args:
-        path: TODO
-        frequency: TODO
-        retention: TODO
-        dateext: TODO
+        path: Path for the logrotate config.
+        frequency: Frequency to use for the logrotate file.
+        retention: Retention time for the logs.
+        dateext: Add dateext to the rotation files.
 
     Returns:
-        TODO
+        The updated content of the logrotate file.
     """
     if not os.path.exists(path):
         return ""
