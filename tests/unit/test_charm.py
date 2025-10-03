@@ -94,9 +94,9 @@ def test_install(monkeypatch):
 )
 def test_invalid_config(signingtable, keytable, private_keys, error_messages):
     """
-    arrange: TODO.
-    act: TODO.
-    assert: TODO.
+    arrange: Prepare a configuration options and key secrets that is invalid.
+    act: Send hook on config_changed.
+    assert: Test that the charm is blocked and the correct message is shown..
     """
     context = ops.testing.Context(
         charm_type=OpenDKIMCharm,
@@ -122,9 +122,9 @@ def test_invalid_config(signingtable, keytable, private_keys, error_messages):
 
 def test_missing_milter_relation():
     """
-    arrange: TODO.
-    act: TODO.
-    assert: TODO.
+    arrange: Prepare a valid configuration and apply it.
+    act: Send hook on config_changed.
+    assert: The charmed is blocked because there is no valid milter relation.
     """
     context = ops.testing.Context(
         charm_type=OpenDKIMCharm,
@@ -162,11 +162,11 @@ def test_missing_milter_relation():
         ),
     ],
 )
-def test_basic_config(initial_opendkin_conf, restart_expected, base_state, monkeypatch):
+def test_correct_config(initial_opendkin_conf, restart_expected, base_state, monkeypatch):
     """
-    arrange: TODO.
-    act: TODO.
-    assert: TODO.
+    arrange: Mock all external accesses and prepare a valid configuration with a milter relation.
+    act: Run hook config_changed.
+    assert: The charm is active. All the files were written and the service is restarted/reloaded.
     """
     monkeypatch.setattr("charm.read_text", MagicMock(return_value=initial_opendkin_conf))
     monkeypatch.setattr("charm.validate_opendkim", MagicMock(return_value=None))
@@ -215,9 +215,9 @@ def test_basic_config(initial_opendkin_conf, restart_expected, base_state, monke
 
 def test_render_file():
     """
-    arrange: TODO.
-    act: TODO.
-    assert: TODO.
+    arrange: Prepare some text and a directory.
+    act: Call render_file.
+    assert: The file is rendered with the correct content.
     """
     user = getpass.getuser()
     with tempfile.TemporaryDirectory() as tmpdir:

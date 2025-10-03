@@ -146,9 +146,9 @@ This is my first message with Python."""
 @pytest.mark.abort_on_fail
 def test_opendkim_testkey_failed_validation_(juju: jubilant.Juju, opendkim_app, smtp_relay_app):
     """
-    arrange: TODO
-    act: TODO
-    assert: TODO
+    arrange: Deploy opendkim and smtp-relay.
+    act: OpenDKIM configuration is invalid as a key file is missing.
+    assert: The OpenDKIM charm is blocked and message says that the configuration is invalid.
     """
     domain = "testrelay.internal"
     selector = "default"

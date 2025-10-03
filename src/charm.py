@@ -148,7 +148,7 @@ class OpenDKIMConfig(BaseModel):
         internalhosts: Set internal hosts whose mail should be signed.
         mode: OpenDKIM model.
         signingtable: OpenDKIM SigningTable as a pair or values per line.
-        keytable: OpenDKIM  as a pair or values per line. Uses refile.
+        keytable: OpenDKIM KeyTable as a pair or values per line. Uses refile.
         private_keys: Dict with the filename without extension as key and the private key as value.
         signing_mode: True if in signing model.
         signingtable_path: Path to the signingtable file.
@@ -234,7 +234,7 @@ def validate_opendkim() -> None:
        ValueError: Raised if the check failed.
     """
     try:
-        subprocess.run(
+        subprocess.run(  # nosec
             ["opendkim-testkey", "-x", OPENDKIM_CONFIG_PATH, "-vv"], timeout=100, check=True
         )
     except (subprocess.CalledProcessError, TimeoutError) as exc:
