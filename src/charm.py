@@ -83,7 +83,7 @@ class OpenDKIMCharm(ops.CharmBase):
         self.unit.status = ops.ActiveStatus()
 
     def _reconcile(self, _: ops.EventBase) -> None:
-        """TODO."""
+        """Configure the workload with the provided configuration for the charm."""
         try:
             config = OpenDKIMConfig.from_charm(self)
         except InvalidCharmConfigError as exc:
@@ -132,34 +132,34 @@ class OpenDKIMCharm(ops.CharmBase):
         try:
             validate_opendkim()
         except ValueError as exc:
+            logger.exception("Invalid opendkim configuration")
             self.unit.status = ops.BlockedStatus(str(exc))
             return
         self.unit.status = ops.ActiveStatus()
 
 
-# pylint: disable=too-few-public-methods,unused-argument
 class OpenDKIMConfig(BaseModel):
-    """TODO.
+    """OpenDKIM configuration.
 
     Attrs:
-        canonicalization: TODO
-        socket: TODO
-        signheaders: TODO
-        mode: TODO
-        internalhosts: TODO
-        signingtable: TODO
-        keytable: TODO
-        private_keys: TODO
-        signing_mode: TODO
-        signingtable_path: TODO
-        keytable_path: TODO
+        canonicalization: DKIM canonicalization scheme.
+        socket: Socket where OpenDKIM listens.
+        signheaders: Header Fields to Sign.
+        internalhosts: Set internal hosts whose mail should be signed.
+        mode: OpenDKIM model.
+        signingtable: OpenDKIM SigningTable as a pair or values per line.
+        keytable: OpenDKIM  as a pair or values per line. Uses refile.
+        private_keys: Dict with the filename without extension as key and the private key as value.
+        signing_mode: True if in signing model.
+        signingtable_path: Path to the signingtable file.
+        keytable_path:  to the keytable file.
     """
 
     canonicalization: str = "relaxed/relaxed"
     socket: str = f"inet:{OPENDKIM_MILTER_PORT}"
     signheaders: str = DEFAULT_SIGN_HEADERS
-    mode: str = "sv"
     internalhosts: str = "0.0.0.0/0"
+    mode: str = "sv"
     signingtable: list[typing.Tuple[str, str]]
     keytable: list[list[str]]
     private_keys: dict[str, str]
@@ -169,21 +169,21 @@ class OpenDKIMConfig(BaseModel):
     @computed_field  # type: ignore[misc]
     @property
     def signing_mode(self) -> bool:
-        """TODO."""
+        """Return True if the charm works in signing mode."""
         return "s" in self.mode
 
     @classmethod
     def from_charm(cls, charm: OpenDKIMCharm) -> typing.Self:
-        """TODO.
+        """Return a new OpenDKIM configuration from the OpenDKIMCharm.
 
         Args:
-          charm: TODO
+          charm: OpenDKIMCharm.
 
         Raises:
-          InvalidCharmConfigError: TODO
+          InvalidCharmConfigError: When the configuration from the charm is not valid.
 
         Return:
-          TODO.
+          Configuration created from the charm.
         """
         errors = []
         try:
@@ -216,7 +216,7 @@ class OpenDKIMConfig(BaseModel):
 
 
 def _parse_yaml_config_option(config_data: ops.model.ConfigData, config_name: str) -> typing.Any:
-    """TODO."""
+    """Return the parsed YAML from a configuration option."""
     config_value = cast(Optional[str], config_data.get(config_name))
     if not config_value:
         raise ValueError(f"empty {config_name} configuration")
@@ -228,12 +228,11 @@ def _parse_yaml_config_option(config_data: ops.model.ConfigData, config_name: st
 
 
 def validate_opendkim() -> None:
-    """TODO.
+    """Validate the opendkim configuration using the binary opendkim-testkey.
 
     Raises:
-       ValueError: TODO
+       ValueError: Raised if the check failed.
     """
-    # JAVI VALIDATE WITH:
     try:
         subprocess.run(
             ["opendkim-testkey", "-x", OPENDKIM_CONFIG_PATH, "-vv"], timeout=100, check=True
@@ -244,12 +243,12 @@ def validate_opendkim() -> None:
 
 
 def read_text(path: Path) -> str:
-    """TODO.
+    """Return text from a file.
 
     Args:
-        path: TODO
+        path: Path of the file ro read.
 
-    Returns: TODO
+    Returns: String content of the file.
     """
     try:
         return path.read_text()

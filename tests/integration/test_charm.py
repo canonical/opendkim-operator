@@ -144,9 +144,7 @@ This is my first message with Python."""
 
 
 @pytest.mark.abort_on_fail
-def test_opendkim_testkey_failed_validation_(
-    juju: jubilant.Juju, opendkim_app, smtp_relay_app, machine_ip_address
-):
+def test_opendkim_testkey_failed_validation_(juju: jubilant.Juju, opendkim_app, smtp_relay_app):
     """
     arrange: TODO
     act: TODO
@@ -184,7 +182,8 @@ def test_opendkim_testkey_failed_validation_(
 
     juju.config(smtp_relay_app, {"relay_domains": f"- {domain}"})
     juju.wait(
-        lambda status: status.apps[smtp_relay_app].is_active and status.apps[opendkim_app].is_blocked,
+        lambda status: status.apps[smtp_relay_app].is_active
+        and status.apps[opendkim_app].is_blocked,
         timeout=3 * 60,
         delay=5,
     )

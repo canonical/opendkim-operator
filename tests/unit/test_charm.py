@@ -151,10 +151,6 @@ def test_missing_milter_relation():
     assert "milter" in out.unit_status.message
 
 
-# JAVI
-# def test_blocked_validation_failed(monkeypatch): ??
-
-
 @pytest.mark.parametrize(
     "initial_opendkin_conf,restart_expected",
     [
