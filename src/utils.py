@@ -48,7 +48,7 @@ def update_logrotate_conf(
         elif retention and conf == "rotate":
             if dateext:
                 new.append(f"{indent}dateext")
-            new.append("{indent}rotate {retention}")
+            new.append(f"{indent}rotate {retention}")
         else:
             new.append(line)
 

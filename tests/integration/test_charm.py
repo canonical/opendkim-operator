@@ -61,7 +61,9 @@ def machine_ip_address_fixture() -> str:
 
 
 @pytest.mark.abort_on_fail
-def test_simple_opendkim(juju: jubilant.Juju, opendkim_app, smtp_relay_app, machine_ip_address):
+def test_opendkim_signed_message(
+    juju: jubilant.Juju, opendkim_app, smtp_relay_app, machine_ip_address
+):
     """
     arrange: Deploy smtp-relay charm with the testrelay.internal domain in relay domains.
     act: Send an email to an address with the testrelay.internal domain.
@@ -77,12 +79,12 @@ def test_simple_opendkim(juju: jubilant.Juju, opendkim_app, smtp_relay_app, mach
     _, private_key = generate_opendkim_genkey(domain=domain, selector=selector)
 
     try:
-        secret_id = juju.add_secret("thekeys", {f"{keyname}": private_key})
+        secret_id = juju.add_secret("opendkimsecret", {f"{keyname}": private_key})
     except jubilant.CLIError as e:
-        secret_info = juju.show_secret("thekeys")
+        secret_info = juju.show_secret("opendkimsecret")
         secret_id = secret_info.uri
         if "already exists" in e.stderr:
-            juju.update_secret("thekeys", {f"{keyname}": private_key})
+            juju.update_secret(secret_id, {f"{keyname}": private_key})
         else:
             logger.error("Error adding secret %s %s", e.stderr, e.stdout)
             raise e
@@ -106,7 +108,7 @@ def test_simple_opendkim(juju: jubilant.Juju, opendkim_app, smtp_relay_app, mach
 
     juju.config(smtp_relay_app, {"relay_domains": f"- {domain}"})
     juju.wait(
-        lambda status: status.apps[smtp_relay_app].is_active,
+        lambda status: jubilant.all_active(status, opendkim_app, smtp_relay_app),
         timeout=3 * 60,
         delay=5,
     )
@@ -139,3 +141,52 @@ This is my first message with Python."""
 
     # Clean up mailcatcher
     requests.delete(f"{mailcatcher_url}/{messages[0]['id']}", timeout=5)
+
+
+@pytest.mark.abort_on_fail
+def test_opendkim_testkey_failed_validation_(
+    juju: jubilant.Juju, opendkim_app, smtp_relay_app, machine_ip_address
+):
+    """
+    arrange: TODO
+    act: TODO
+    assert: TODO
+    """
+    domain = "testrelay.internal"
+    selector = "default"
+    keyname = "testrelay-internal-default"
+    _, private_key = generate_opendkim_genkey(domain=domain, selector=selector)
+
+    try:
+        secret_id = juju.add_secret("opendkimsecret", {f"{keyname}": private_key})
+    except jubilant.CLIError as e:
+        secret_info = juju.show_secret("opendkimsecret")
+        secret_id = secret_info.uri
+        if "already exists" in e.stderr:
+            juju.update_secret(secret_id, {f"{keyname}": private_key})
+        else:
+            logger.error("Error adding secret %s %s", e.stderr, e.stdout)
+            raise e
+
+    juju.cli("grant-secret", secret_id, opendkim_app)
+    keytable = [
+        [f"{selector}._domainkey.{domain}", f"{domain}:{selector}:/etc/dkimkeys/WRONGNAME.private"]
+    ]
+    signingtable = [[f"*@{domain}", f"{selector}._domainkey.{domain}"]]
+    juju.config(
+        opendkim_app,
+        {
+            "keytable": json.dumps(keytable),
+            "signingtable": json.dumps(signingtable),
+            "private-keys": secret_id,
+        },
+    )
+
+    juju.config(smtp_relay_app, {"relay_domains": f"- {domain}"})
+    juju.wait(
+        lambda status: status.apps[smtp_relay_app].is_active and status.apps[opendkim_app].is_blocked,
+        timeout=3 * 60,
+        delay=5,
+    )
+    status = juju.status()
+    assert "Wrong opendkim configuration" in status.apps[opendkim_app].app_status.message

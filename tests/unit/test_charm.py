@@ -4,6 +4,7 @@
 """Unit tests."""
 
 import getpass
+import json
 import os
 import tempfile
 import typing
@@ -47,19 +48,51 @@ def test_install(monkeypatch):
 @pytest.mark.parametrize(
     "signingtable,keytable,private_keys,error_messages",
     [
-        pytest.param(None, None, None, ["empty signingtable"], id="No config options"),
-        pytest.param("", "", {}, ["empty signingtable"], id="Empty config options"),
         pytest.param(
-            "XX",
-            "XX",
-            {},
-            ["signingtable", "keytable"],
-            id="test3",
+            None,
+            None,
+            None,
+            ["empty signingtable", "empty keytable", "empty private-keys"],
+            id="No config options",
         ),
-        pytest.param("*@", "", {}, ["format"], id="Wrong YAML"),
+        pytest.param(
+            "",
+            "",
+            None,
+            ["empty signingtable", "empty keytable", "empty private-keys"],
+            id="Empty config options",
+        ),
+        pytest.param(
+            "*wrongyaml",
+            "*wrongyaml",
+            {},
+            ["wrong signingtable", "wrong keytable"],
+            id="Wrong YAML formats",
+        ),
+        pytest.param(
+            "signingtable",
+            "keytable",
+            {},
+            ["wrong", " signingtable,keytable."],
+            id="Wrong YAML config options",
+        ),
+        pytest.param(
+            json.dumps([["valid", "valid"]]),
+            "keytable",
+            {},
+            ["wrong", " keytable."],
+            id="Wrong YAML config options",
+        ),
+        pytest.param(
+            "signingtable",
+            json.dumps([["*@example.com", "selector._domainkey.example.com"]]),
+            {},
+            ["wrong", " signingtable."],
+            id="Wrong YAML config options",
+        ),
     ],
 )
-def test_blocked_charm(signingtable, keytable, private_keys, error_messages):
+def test_invalid_config(signingtable, keytable, private_keys, error_messages):
     """
     arrange: TODO.
     act: TODO.
@@ -87,31 +120,64 @@ def test_blocked_charm(signingtable, keytable, private_keys, error_messages):
         assert error_message in out.unit_status.message
 
 
-# JAVI
-# def test_blocked_validation_failed(monkeypatch): ??
-
-
-# JAVI
-# def test_blocked_validation_failed(monkeypatch): ??
-
-
-# JAVI
-# def test_relation_changed(monkeypatch): ??
-
-
-def test_basic_config(monkeypatch):
+def test_missing_milter_relation():
     """
     arrange: TODO.
     act: TODO.
     assert: TODO.
     """
-    monkeypatch.setattr("charm.read_text", MagicMock(return_value=""))
+    context = ops.testing.Context(
+        charm_type=OpenDKIMCharm,
+    )
+
+    secret_id = token_hex(20)[:20]
+    secrets = {ops.testing.Secret(id=secret_id, tracked_content={"thekey": "PRIVATEKEY"})}
+    config = {
+        "signingtable": json.dumps([["*@example.com", "selector._domainkey.example.com"]]),
+        "keytable": json.dumps(
+            [
+                [
+                    "selector._domainkey.example.com",
+                    "example.com:selector:/etc/dkimkeys/thekey.private",
+                ]
+            ]
+        ),
+        "private-keys": f"secret:{secret_id}",
+    }
+    base_state: dict[str, typing.Any] = {"config": config, "secrets": secrets}
+    state = ops.testing.State(**base_state)
+    out = context.run(context.on.config_changed(), state)
+    assert out.unit_status.name == ops.testing.BlockedStatus.name
+    assert "milter" in out.unit_status.message
+
+
+# JAVI
+# def test_blocked_validation_failed(monkeypatch): ??
+
+
+@pytest.mark.parametrize(
+    "initial_opendkin_conf,restart_expected",
+    [
+        pytest.param("", True, id="Initial opendkim.conf empty, restart service"),
+        pytest.param(
+            (Path(__file__).parent / "files/base_opendkim.conf").read_text(),
+            False,
+            id="opendkim.conf not changed, do not restart service",
+        ),
+    ],
+)
+def test_basic_config(initial_opendkin_conf, restart_expected, base_state, monkeypatch):
+    """
+    arrange: TODO.
+    act: TODO.
+    assert: TODO.
+    """
+    monkeypatch.setattr("charm.read_text", MagicMock(return_value=initial_opendkin_conf))
     monkeypatch.setattr("charm.validate_opendkim", MagicMock(return_value=None))
     systemd_reload_mock = MagicMock()
     monkeypatch.setattr("charm.systemd.service_reload", systemd_reload_mock)
     systemd_restart_mock = MagicMock()
     monkeypatch.setattr("charm.systemd.service_restart", systemd_restart_mock)
-
     render_file_mock = MagicMock()
     monkeypatch.setattr("charm.render_file", render_file_mock)
 
@@ -119,53 +185,36 @@ def test_basic_config(monkeypatch):
         charm_type=OpenDKIMCharm,
     )
 
-    keyname = "example.com-selector"
-    keytable = f"""
-[[selector._domainkey.example.com, example.com:selector:/etc/dkimkeys/{keyname}.private]]
-    """
-    signingtable = '[["*@example.com", "selector._domainkey.example.com"]]'
-    private_keys = {keyname: "PRIVATEKEY"}
-    secret_id = token_hex(20)[:20]
-
-    milter_relation = ops.testing.Relation(
-        id=1,
-        endpoint="milter",
-        interface="milter",
-        remote_app_data={},
-        remote_app_name="smtp-relay",
-    )
-    base_state: dict[str, typing.Any] = {
-        "config": {
-            "keytable": keytable,
-            "signingtable": signingtable,
-            "private-keys": f"secret:{secret_id}",
-        },
-        "secrets": {ops.testing.Secret(id=secret_id, tracked_content=private_keys)},
-        "relations": [milter_relation],
-    }
     state = ops.testing.State(**base_state)
     out = context.run(context.on.config_changed(), state)
 
     assert out.unit_status.name == ops.testing.ActiveStatus.name
-
-    # JAVI maybe test with two relations? is this what we want?
     assert list(out.relations)[0].local_unit_data["port"] == "8892"
-    # systemd_reload_mock.assert_called_with("opendkim")
-    systemd_restart_mock.assert_called_with("opendkim")
-    # There must be 4 calls to render_file.
-    assert render_file_mock.call_count == 4
-    expected_opendkim_conf = (Path(__file__).parent / "files/opendkim.conf").read_text()
-    render_file_mock.assert_any_call(Path(f"/etc/dkimkeys/{keyname}.private"), "PRIVATEKEY", 0o600)
+
+    systemd_reload_mock.assert_called_with("opendkim")
+    if restart_expected:
+        assert render_file_mock.call_count == 5
+        systemd_restart_mock.assert_called_with("opendkim")
+        render_file_mock.assert_any_call(
+            Path("/etc/opendkim.conf"),
+            (Path(__file__).parent / "files/base_opendkim.conf").read_text(),
+            0o644,
+        )
+    else:
+        assert render_file_mock.call_count == 4
+        systemd_restart_mock.assert_not_called()
+    render_file_mock.assert_any_call(Path("/etc/dkimkeys/key1.private"), "PRIVATEKEY1", 0o600)
+    render_file_mock.assert_any_call(Path("/etc/dkimkeys/key2.private"), "PRIVATEKEY2", 0o600)
     render_file_mock.assert_any_call(
-        Path("/etc/dkimkeys/signingtable"), "*@example.com selector._domainkey.example.com", 0o644
+        Path("/etc/dkimkeys/signingtable"),
+        (Path(__file__).parent / "files/base_signingtable").read_text(),
+        0o644,
     )
     render_file_mock.assert_any_call(
         Path("/etc/dkimkeys/keytable"),
-        "selector._domainkey.example.com"
-        " example.com:selector:/etc/dkimkeys/example.com-selector.private",
+        (Path(__file__).parent / "files/base_keytable").read_text(),
         0o644,
     )
-    render_file_mock.assert_any_call(Path("/etc/opendkim.conf"), expected_opendkim_conf, 0o644)
 
 
 def test_render_file():

@@ -3,8 +3,6 @@
 # Copyright 2025 Canonical Ltd.
 # See LICENSE file for licensing details.
 
-# Learn more at: https://documentation.ubuntu.com/juju/3.6/howto/manage-charms/#build-a-charm
-
 """OpenDKIM charm."""
 
 import logging
@@ -78,7 +76,6 @@ class OpenDKIMCharm(ops.CharmBase):
         """Install opendkim package."""
         self.unit.status = ops.MaintenanceStatus("installing opendkim")
         apt.add_package(package_names=OPENDKIM_PACKAGE_NAME, update_cache=True)
-        # JAVI log rotation?
         rotate_content = utils.update_logrotate_conf(
             str(LOG_ROTATE_SYSLOG), frequency="daily", retention=LOG_RETENTION_DAYS
         )
@@ -96,7 +93,7 @@ class OpenDKIMCharm(ops.CharmBase):
 
         milter_relations = self.model.relations.get(MILTER_RELATION_NAME)
         if not milter_relations:
-            self.unit.status = ops.WaitingStatus("waiting for milter relations")
+            self.unit.status = ops.BlockedStatus("Missing milter relations")
             return
         for milter_relation in milter_relations:
             milter_relation.data[self.model.unit]["port"] = str(OPENDKIM_MILTER_PORT)
@@ -188,36 +185,46 @@ class OpenDKIMConfig(BaseModel):
         Return:
           TODO.
         """
-        signingtable_option = cast(Optional[str], charm.config.get("signingtable"))
-        if not signingtable_option:
-            raise InvalidCharmConfigError("empty signingtable configuration option")
+        errors = []
         try:
-            signingtable = yaml.safe_load(signingtable_option)
-        except yaml.YAMLError as exc:
-            raise InvalidCharmConfigError("Wrong signingtable format") from exc
+            signingtable = _parse_yaml_config_option(charm.config, "signingtable")
+        except ValueError as e:
+            errors.append(str(e))
 
-        keytable_option = cast(Optional[str], charm.config.get("keytable"))
-        if not keytable_option:
-            raise InvalidCharmConfigError("empty keytable configuration option")
         try:
-            keytable = yaml.safe_load(keytable_option)
-        except yaml.YAMLError as exc:
-            raise InvalidCharmConfigError("Wrong keytable format") from exc
+            keytable = _parse_yaml_config_option(charm.config, "keytable")
+        except ValueError as e:
+            errors.append(str(e))
 
         private_keys_secret_id = cast(Optional[str], charm.config.get("private-keys"))
-        if private_keys_secret_id is None:
-            raise InvalidCharmConfigError("empty private_keys configuration option")
-        private_keys_secret_id = private_keys_secret_id.replace("secret:", "")
+        if not private_keys_secret_id:
+            errors.append("empty private-keys configuration")
+
+        if errors:
+            raise InvalidCharmConfigError(" - ".join(errors))
+
+        private_keys_secret_id = cast(str, private_keys_secret_id).replace("secret:", "")
         secret = charm.model.get_secret(id=private_keys_secret_id)
 
-        # JAVI. Does this refresh has any implication in secret updating/rotation?
-        private_keys = typing.cast(dict[str, str], secret.get_content(refresh=True))
+        private_keys = secret.get_content(refresh=True)
         try:
             return cls(signingtable=signingtable, keytable=keytable, private_keys=private_keys)
         except ValidationError as exc:
             logger.error(str(exc))
             error_field_str = ",".join(f"{field}" for field in get_invalid_config_fields(exc))
-            raise InvalidCharmConfigError(f"Wrong config options: {error_field_str}") from exc
+            raise InvalidCharmConfigError(f"wrong config options: {error_field_str}.") from exc
+
+
+def _parse_yaml_config_option(config_data: ops.model.ConfigData, config_name: str) -> typing.Any:
+    """TODO."""
+    config_value = cast(Optional[str], config_data.get(config_name))
+    if not config_value:
+        raise ValueError(f"empty {config_name} configuration")
+    try:
+        return yaml.safe_load(config_value)
+    except yaml.YAMLError as exc:
+        logger.exception("Failed loading %s", config_name)
+        raise ValueError(f"wrong {config_name} format") from exc
 
 
 def validate_opendkim() -> None:
