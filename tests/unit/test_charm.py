@@ -111,7 +111,7 @@ def test_invalid_config(signingtable, keytable, private_keys, error_messages):
     if private_keys is not None:
         secret_id = token_hex(20)[:20]
         config["private-keys"] = f"secret:{secret_id}"
-        secrets = {ops.testing.Secret(id=secret_id, tracked_content=private_keys)}
+        secrets = {ops.testing.Secret(id=f"secret:{secret_id}", tracked_content=private_keys)}
     base_state: dict[str, typing.Any] = {"config": config, "secrets": secrets}
     state = ops.testing.State(**base_state)
     out = context.run(context.on.config_changed(), state)
@@ -131,7 +131,9 @@ def test_missing_milter_relation():
     )
 
     secret_id = token_hex(20)[:20]
-    secrets = {ops.testing.Secret(id=secret_id, tracked_content={"thekey": "PRIVATEKEY"})}
+    secrets = {
+        ops.testing.Secret(id=f"secret:{secret_id}", tracked_content={"thekey": "PRIVATEKEY"})
+    }
     config = {
         "signingtable": json.dumps([["*@example.com", "selector._domainkey.example.com"]]),
         "keytable": json.dumps(

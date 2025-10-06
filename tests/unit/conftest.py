@@ -16,7 +16,7 @@ def base_state_fixture() -> dict[str, typing.Any]:
     """Fixture for the base state for opendkim."""
     secret_id = token_hex(20)[:20]
     private_keys = {"key1": "PRIVATEKEY1", "key2": "PRIVATEKEY2"}
-    secrets = {ops.testing.Secret(id=secret_id, tracked_content=private_keys)}
+    secrets = {ops.testing.Secret(id=f"secret:{secret_id}", tracked_content=private_keys)}
 
     keytable = json.dumps(
         [

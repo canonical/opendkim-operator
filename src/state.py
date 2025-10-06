@@ -99,8 +99,7 @@ class OpenDKIMConfig(BaseModel):
         if errors:
             raise InvalidCharmConfigError(" - ".join(errors))
 
-        private_keys_secret_id = typing.cast(str, private_keys_secret_id).replace("secret:", "")
-        secret = model.get_secret(id=private_keys_secret_id)
+        secret = model.get_secret(id=typing.cast(str, private_keys_secret_id))
 
         private_keys = secret.get_content(refresh=True)
         try:
