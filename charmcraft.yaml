@@ -31,7 +31,7 @@ provides:
     interface: milter
 
 assumes:
-  - juju >= 3.4
+  - juju >= 3.6
 
 charm-libs:
 - lib: operator_libs_linux.apt

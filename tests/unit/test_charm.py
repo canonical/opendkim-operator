@@ -16,7 +16,7 @@ import ops
 import ops.testing
 import pytest
 
-from charm import OpenDKIMCharm, render_file
+from charm import OpenDKIMCharm, write_file
 
 
 def test_install(monkeypatch):
@@ -28,8 +28,8 @@ def test_install(monkeypatch):
     add_package_mock = MagicMock()
     monkeypatch.setattr("charm.apt.add_package", add_package_mock)
 
-    render_file_mock = MagicMock()
-    monkeypatch.setattr("charm.render_file", render_file_mock)
+    write_file_mock = MagicMock()
+    monkeypatch.setattr("charm.write_file", write_file_mock)
     update_logrotate_conf_mock = MagicMock()
     monkeypatch.setattr("utils.update_logrotate_conf", update_logrotate_conf_mock)
 
@@ -39,7 +39,7 @@ def test_install(monkeypatch):
     base_state: dict[str, str] = {}
     state = ops.testing.State(**base_state)
     out = context.run(context.on.install(), state)
-    render_file_mock.assert_called_with(Path("/etc/logrotate.d/rsyslog"), ANY, 0o644, user="root")
+    write_file_mock.assert_called_with(Path("/etc/logrotate.d/rsyslog"), ANY, 0o644, user="root")
     assert len(out.opened_ports) == 1
     assert list(out.opened_ports)[0].port == 8892
     assert out.unit_status.name == ops.testing.WaitingStatus.name
@@ -176,8 +176,8 @@ def test_correct_config(initial_opendkin_conf, restart_expected, base_state, mon
     monkeypatch.setattr("charm.systemd.service_reload", systemd_reload_mock)
     systemd_restart_mock = MagicMock()
     monkeypatch.setattr("charm.systemd.service_restart", systemd_restart_mock)
-    render_file_mock = MagicMock()
-    monkeypatch.setattr("charm.render_file", render_file_mock)
+    write_file_mock = MagicMock()
+    monkeypatch.setattr("charm.write_file", write_file_mock)
 
     context = ops.testing.Context(
         charm_type=OpenDKIMCharm,
@@ -191,41 +191,41 @@ def test_correct_config(initial_opendkin_conf, restart_expected, base_state, mon
 
     systemd_reload_mock.assert_called_with("opendkim")
     if restart_expected:
-        assert render_file_mock.call_count == 5
+        assert write_file_mock.call_count == 5
         systemd_restart_mock.assert_called_with("opendkim")
-        render_file_mock.assert_any_call(
+        write_file_mock.assert_any_call(
             Path("/etc/opendkim.conf"),
             (Path(__file__).parent / "files/base_opendkim.conf").read_text(),
             0o644,
         )
     else:
-        assert render_file_mock.call_count == 4
+        assert write_file_mock.call_count == 4
         systemd_restart_mock.assert_not_called()
-    render_file_mock.assert_any_call(Path("/etc/dkimkeys/key1.private"), "PRIVATEKEY1", 0o600)
-    render_file_mock.assert_any_call(Path("/etc/dkimkeys/key2.private"), "PRIVATEKEY2", 0o600)
-    render_file_mock.assert_any_call(
+    write_file_mock.assert_any_call(Path("/etc/dkimkeys/key1.private"), "PRIVATEKEY1", 0o600)
+    write_file_mock.assert_any_call(Path("/etc/dkimkeys/key2.private"), "PRIVATEKEY2", 0o600)
+    write_file_mock.assert_any_call(
         Path("/etc/dkimkeys/signingtable"),
         (Path(__file__).parent / "files/base_signingtable").read_text(),
         0o644,
     )
-    render_file_mock.assert_any_call(
+    write_file_mock.assert_any_call(
         Path("/etc/dkimkeys/keytable"),
         (Path(__file__).parent / "files/base_keytable").read_text(),
         0o644,
     )
 
 
-def test_render_file():
+def test_write_file():
     """
     arrange: Prepare some text and a directory.
-    act: Call render_file.
+    act: Call write_file.
     assert: The file is rendered with the correct content.
     """
     user = getpass.getuser()
     with tempfile.TemporaryDirectory() as tmpdir:
         content = "any text"
         path = Path(tmpdir) / "onefile.txt"
-        render_file(path, content, 0o666, user=user)
+        write_file(path, content, 0o666, user=user)
         st = os.stat(str(path))
         assert oct(st.st_mode) == "0o100666"
         assert path.read_text() == content

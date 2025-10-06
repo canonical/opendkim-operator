@@ -60,7 +60,7 @@ class OpenDKIMCharm(ops.CharmBase):
         rotate_content = utils.update_logrotate_conf(
             str(LOG_ROTATE_SYSLOG), frequency="daily", retention=LOG_RETENTION_DAYS
         )
-        render_file(LOG_ROTATE_SYSLOG, rotate_content, 0o644, user="root")
+        write_file(LOG_ROTATE_SYSLOG, rotate_content, 0o644, user="root")
         self.unit.status = ops.WaitingStatus()
 
     def _reconcile(self, _: ops.EventBase) -> None:
@@ -81,13 +81,13 @@ class OpenDKIMCharm(ops.CharmBase):
 
         for keyname, keyvalue in config.private_keys.items():
             keyfile = OPENDKIM_KEYS_PATH / f"{keyname}.private"
-            render_file(keyfile, keyvalue, 0o600)
+            write_file(keyfile, keyvalue, 0o600)
 
         signingtable = "\n".join(" ".join(row) for row in config.signingtable)
-        render_file(config.signingtable_path, signingtable, 0o644)
+        write_file(config.signingtable_path, signingtable, 0o644)
 
         keytable = "\n".join(" ".join(row) for row in config.keytable)
-        render_file(config.keytable_path, keytable, 0o644)
+        write_file(config.keytable_path, keytable, 0o644)
 
         context = config.model_dump()
         env = Environment(
@@ -102,7 +102,7 @@ class OpenDKIMCharm(ops.CharmBase):
 
         previous_rendered = read_text(OPENDKIM_CONFIG_PATH)
         if rendered != previous_rendered:
-            render_file(OPENDKIM_CONFIG_PATH, rendered, 0o644)
+            write_file(OPENDKIM_CONFIG_PATH, rendered, 0o644)
             logger.info("Restart opendkim")
             systemd.service_restart("opendkim")
 
@@ -147,7 +147,7 @@ def read_text(path: Path) -> str:
         return ""
 
 
-def render_file(path: Path, content: str, mode: int, user: str = OPENDKIM_USER) -> None:
+def write_file(path: Path, content: str, mode: int, user: str = OPENDKIM_USER) -> None:
     """Write a content rendered from a template to a file.
 
     Args:
