@@ -16,7 +16,8 @@ import ops
 import ops.testing
 import pytest
 
-from charm import OpenDKIMCharm, write_file
+import utils
+from charm import OpenDKIMCharm
 
 
 def test_install(monkeypatch):
@@ -29,7 +30,7 @@ def test_install(monkeypatch):
     monkeypatch.setattr("charm.apt.add_package", add_package_mock)
 
     write_file_mock = MagicMock()
-    monkeypatch.setattr("charm.write_file", write_file_mock)
+    monkeypatch.setattr("utils.write_file", write_file_mock)
     update_logrotate_conf_mock = MagicMock()
     monkeypatch.setattr("utils.update_logrotate_conf", update_logrotate_conf_mock)
 
@@ -170,14 +171,14 @@ def test_correct_config(initial_opendkin_conf, restart_expected, base_state, mon
     act: Run hook config_changed.
     assert: The charm is active. All the files were written and the service is restarted/reloaded.
     """
-    monkeypatch.setattr("charm.read_text", MagicMock(return_value=initial_opendkin_conf))
+    monkeypatch.setattr("utils.read_text", MagicMock(return_value=initial_opendkin_conf))
     monkeypatch.setattr("charm.validate_opendkim", MagicMock(return_value=None))
     systemd_reload_mock = MagicMock()
     monkeypatch.setattr("charm.systemd.service_reload", systemd_reload_mock)
     systemd_restart_mock = MagicMock()
     monkeypatch.setattr("charm.systemd.service_restart", systemd_restart_mock)
     write_file_mock = MagicMock()
-    monkeypatch.setattr("charm.write_file", write_file_mock)
+    monkeypatch.setattr("utils.write_file", write_file_mock)
 
     context = ops.testing.Context(
         charm_type=OpenDKIMCharm,
@@ -197,21 +198,28 @@ def test_correct_config(initial_opendkin_conf, restart_expected, base_state, mon
             Path("/etc/opendkim.conf"),
             (Path(__file__).parent / "files/base_opendkim.conf").read_text(),
             0o644,
+            user="opendkim",
         )
     else:
         assert write_file_mock.call_count == 4
         systemd_restart_mock.assert_not_called()
-    write_file_mock.assert_any_call(Path("/etc/dkimkeys/key1.private"), "PRIVATEKEY1", 0o600)
-    write_file_mock.assert_any_call(Path("/etc/dkimkeys/key2.private"), "PRIVATEKEY2", 0o600)
+    write_file_mock.assert_any_call(
+        Path("/etc/dkimkeys/key1.private"), "PRIVATEKEY1", 0o600, user="opendkim"
+    )
+    write_file_mock.assert_any_call(
+        Path("/etc/dkimkeys/key2.private"), "PRIVATEKEY2", 0o600, user="opendkim"
+    )
     write_file_mock.assert_any_call(
         Path("/etc/dkimkeys/signingtable"),
         (Path(__file__).parent / "files/base_signingtable").read_text(),
         0o644,
+        user="opendkim",
     )
     write_file_mock.assert_any_call(
         Path("/etc/dkimkeys/keytable"),
         (Path(__file__).parent / "files/base_keytable").read_text(),
         0o644,
+        user="opendkim",
     )
 
 
@@ -225,7 +233,7 @@ def test_write_file():
     with tempfile.TemporaryDirectory() as tmpdir:
         content = "any text"
         path = Path(tmpdir) / "onefile.txt"
-        write_file(path, content, 0o666, user=user)
+        utils.write_file(path, content, 0o666, user=user)
         st = os.stat(str(path))
         assert oct(st.st_mode) == "0o100666"
         assert path.read_text() == content

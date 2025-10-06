@@ -4,6 +4,7 @@
 """OpenDKIM charm utils."""
 
 import os
+import pwd
 import re
 from pathlib import Path
 
@@ -53,3 +54,33 @@ def update_logrotate_conf(
             new.append(line)
 
     return "\n".join(new)
+
+
+def read_text(path: Path) -> str:
+    """Return text from a file.
+
+    Args:
+        path: Path of the file ro read.
+
+    Returns: String content of the file.
+    """
+    try:
+        return path.read_text()
+    except FileNotFoundError:
+        return ""
+
+
+def write_file(path: Path, content: str, mode: int, user: str) -> None:
+    """Write a content rendered from a template to a file.
+
+    Args:
+        path: Path object to the file.
+        content: the data to be written to the file.
+        mode: access permission mask applied to the
+            file using chmod (e.g. 0o640).
+        user: The user that will own the file.
+    """
+    path.write_text(content, encoding="utf-8")
+    os.chmod(path, mode)
+    u = pwd.getpwnam(user)
+    os.chown(path, uid=u.pw_uid, gid=u.pw_gid)

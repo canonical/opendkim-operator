@@ -6,8 +6,6 @@
 """OpenDKIM charm."""
 
 import logging
-import os
-import pwd
 import subprocess  # nosec B404
 import typing
 from pathlib import Path
@@ -60,7 +58,7 @@ class OpenDKIMCharm(ops.CharmBase):
         rotate_content = utils.update_logrotate_conf(
             str(LOG_ROTATE_SYSLOG), frequency="daily", retention=LOG_RETENTION_DAYS
         )
-        write_file(LOG_ROTATE_SYSLOG, rotate_content, 0o644, user="root")
+        utils.write_file(LOG_ROTATE_SYSLOG, rotate_content, 0o644, user="root")
         self.unit.status = ops.WaitingStatus()
 
     def _reconcile(self, _: ops.EventBase) -> None:
@@ -81,13 +79,13 @@ class OpenDKIMCharm(ops.CharmBase):
 
         for keyname, keyvalue in config.private_keys.items():
             keyfile = OPENDKIM_KEYS_PATH / f"{keyname}.private"
-            write_file(keyfile, keyvalue, 0o600)
+            utils.write_file(keyfile, keyvalue, 0o600, user=OPENDKIM_USER)
 
         signingtable = "\n".join(" ".join(row) for row in config.signingtable)
-        write_file(config.signingtable_path, signingtable, 0o644)
+        utils.write_file(config.signingtable_path, signingtable, 0o644, user=OPENDKIM_USER)
 
         keytable = "\n".join(" ".join(row) for row in config.keytable)
-        write_file(config.keytable_path, keytable, 0o644)
+        utils.write_file(config.keytable_path, keytable, 0o644, user=OPENDKIM_USER)
 
         context = config.model_dump()
         env = Environment(
@@ -100,9 +98,9 @@ class OpenDKIMCharm(ops.CharmBase):
         template = env.get_template(str(OPENDKIM_CONFIG_TEMPLATE))
         rendered = template.render(context)
 
-        previous_rendered = read_text(OPENDKIM_CONFIG_PATH)
+        previous_rendered = utils.read_text(OPENDKIM_CONFIG_PATH)
         if rendered != previous_rendered:
-            write_file(OPENDKIM_CONFIG_PATH, rendered, 0o644)
+            utils.write_file(OPENDKIM_CONFIG_PATH, rendered, 0o644, user=OPENDKIM_USER)
             logger.info("Restart opendkim")
             systemd.service_restart("opendkim")
 
@@ -131,36 +129,6 @@ def validate_opendkim() -> None:
     except (subprocess.CalledProcessError, TimeoutError) as exc:
         logger.exception("Error validating with opendkim-testkey")
         raise InvalidCharmConfigError("Wrong opendkim configuration. See logs") from exc
-
-
-def read_text(path: Path) -> str:
-    """Return text from a file.
-
-    Args:
-        path: Path of the file ro read.
-
-    Returns: String content of the file.
-    """
-    try:
-        return path.read_text()
-    except FileNotFoundError:
-        return ""
-
-
-def write_file(path: Path, content: str, mode: int, user: str = OPENDKIM_USER) -> None:
-    """Write a content rendered from a template to a file.
-
-    Args:
-        path: Path object to the file.
-        content: the data to be written to the file.
-        mode: access permission mask applied to the
-            file using chmod (e.g. 0o640).
-        user: The user that will own the file.
-    """
-    path.write_text(content, encoding="utf-8")
-    os.chmod(path, mode)
-    u = pwd.getpwnam(user)
-    os.chown(path, uid=u.pw_uid, gid=u.pw_gid)
 
 
 if __name__ == "__main__":  # pragma: nocover
