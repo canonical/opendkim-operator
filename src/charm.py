@@ -51,8 +51,6 @@ class OpenDKIMCharm(ops.CharmBase):
         self.framework.observe(self.on.secret_changed, self._reconcile)
         self.framework.observe(self.on[MILTER_RELATION_NAME].relation_changed, self._reconcile)
         self.framework.observe(self.on[MILTER_RELATION_NAME].relation_departed, self._reconcile)
-        self.framework.observe(self.on[MILTER_RELATION_NAME].relation_broken, self._reconcile)
-        self.framework.observe(self.on[MILTER_RELATION_NAME].relation_joined, self._reconcile)
         self.unit.open_port("tcp", OPENDKIM_MILTER_PORT)
 
     def _install(self, _: ops.EventBase) -> None:
