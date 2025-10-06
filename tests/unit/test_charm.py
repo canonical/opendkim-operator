@@ -42,7 +42,7 @@ def test_install(monkeypatch):
     render_file_mock.assert_called_with(Path("/etc/logrotate.d/rsyslog"), ANY, 0o644, user="root")
     assert len(out.opened_ports) == 1
     assert list(out.opened_ports)[0].port == 8892
-    assert out.unit_status.name == ops.testing.ActiveStatus.name
+    assert out.unit_status.name == ops.testing.WaitingStatus.name
 
 
 @pytest.mark.parametrize(

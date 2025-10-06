@@ -43,15 +43,18 @@ config:
   options:
     signingtable:
       type: string
-      description: Signing table mapping.
+      description: |
+        Signing table mapping. This configuration is in YAML format. It is a list of
+        lines, being each line another list with two elements, the key and the value.
     keytable:
       type: string
       description: |
-        Key table mapping.
+        Key table mapping. This configuration is in YAML format. It is a list of
+        lines, being each line another list with two elements, the key and the value.
     private-keys:
       type: secret
       description: |
-        Dictionary of private key pairs. The key is the filename.
+        Dictionary of private key pairs. The key is the filename without the '.private' extension.
     mode:
       type: string
       default: 'sv'
