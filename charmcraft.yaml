@@ -46,15 +46,29 @@ config:
       description: |
         Signing table mapping. This configuration is in YAML format. It is a list of
         lines, being each line another list with two elements, the key and the value.
+        The file format is refile, so it can include regular expressions.
+        The folloging is an example of the signingtable:
+
+            - - "*@example.com"
+              - "selector._domainkey.example.com"
+            - - "*@other.example.com"
+              - "selector._domainkey.other.example.com"
     keytable:
       type: string
       description: |
         Key table mapping. This configuration is in YAML format. It is a list of
         lines, being each line another list with two elements, the key and the value.
+        The following is an example of a keytable:
+
+            - - "selector._domainkey.example.com
+              - "example.com:selector:/etc/dkimkeys/key1.private"
+            - - "selector._domainkey.other.example.com"
+              - "other.example.com:selector:/etc/dkimkeys/key2.private"
     private-keys:
       type: secret
       description: |
-        Dictionary of private key pairs. The key is the filename without the '.private' extension.
+        Secret that contains the private keys. The keys in the secret define the filename
+         without the '.private' extension, and the value the private key.
     mode:
       type: string
       default: 'sv'
