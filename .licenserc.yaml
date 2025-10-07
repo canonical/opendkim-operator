@@ -25,4 +25,6 @@ header:
     - 'zap_rules.tsv'
     - '**/*.md.j2'
     - '**/lib/charms/**'
+    - 'templates/opendkim.conf.j2'
+    - 'tests/unit/files/**'
   comment: on-failure
