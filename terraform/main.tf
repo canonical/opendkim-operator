@@ -6,7 +6,7 @@ resource "juju_application" "charm_name" {
   model = var.model
 
   charm {
-    name     = "<charm_name>"
+    name     = "opendkim"
     channel  = var.channel
     revision = var.revision
     base     = var.base
