@@ -4,7 +4,7 @@
 variable "channel" {
   description = "The channel to use when deploying a charm."
   type        = string
-  default     = "latest/edge"
+  default     = "2/edge"
 }
 
 variable "revision" {

@@ -1,7 +1,6 @@
-<!-- Remember to update this file for your charm -- replace <charm_name> with the appropriate name. -->
-# <charm_name> Terraform module
+# opendkim Terraform module
 
-This folder contains a base [Terraform][Terraform] module for the <charm_name> charm.
+This folder contains a base [Terraform][Terraform] module for the opendkim charm.
 
 The module uses the [Terraform Juju provider][Terraform Juju provider] to model the charm
 deployment onto any Kubernetes environment managed by [Juju][Juju].
@@ -16,9 +15,9 @@ deployment onto any Kubernetes environment managed by [Juju][Juju].
   the Juju application name.
 - **versions.tf** - Defines the Terraform provider version.
 
-## Using <charm_name> base module in higher level modules
+## Using opendkim base module in higher level modules
 
-If you want to use `<charm_name>` base module as part of your Terraform module, import it
+If you want to use `opendkim` base module as part of your Terraform module, import it
 like shown below:
 
 ```text
@@ -26,8 +25,8 @@ data "juju_model" "my_model" {
   name = var.model
 }
 
-module "<charm_name>" {
-  source = "git::https://github.com/canonical/<charm_name>-operator//terraform"
+module "opendkim" {
+  source = "git::https://github.com/canonical/opendkim-operator//terraform"
   
   model = juju_model.my_model.name
   # (Customize configuration variables here if needed)
@@ -37,11 +36,11 @@ module "<charm_name>" {
 Create integrations, for instance:
 
 ```text
-resource "juju_integration" "<charm_name>-loki" {
+resource "juju_integration" "opendkim-loki" {
   model = juju_model.my_model.name
   application {
-    name     = module.<charm_name>.app_name
-    endpoint = module.<charm_name>.endpoints.logging
+    name     = module.opendkim.app_name
+    endpoint = module.opendkim.endpoints.logging
   }
   application {
     name     = "loki-k8s"
@@ -50,9 +49,9 @@ resource "juju_integration" "<charm_name>-loki" {
 }
 ```
 
-The complete list of available integrations can be found [in the Integrations tab][<charm_name>-integrations].
+The complete list of available integrations can be found [in the Integrations tab][opendkim-integrations].
 
 [Terraform]: https://developer.hashicorp.com/terraform
 [Terraform Juju provider]: https://registry.terraform.io/providers/juju/juju/latest
 [Juju]: https://juju.is
-[<charm_name>-integrations]: https://charmhub.io/<charm_name>/integrations
+[opendkim-integrations]: https://charmhub.io/opendkim/integrations
