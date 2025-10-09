@@ -11,7 +11,7 @@ import typing
 from pathlib import Path
 
 import ops
-from charms.operator_libs_linux.v0 import apt
+from charmlibs import apt
 from charms.operator_libs_linux.v1 import systemd
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
