@@ -12,5 +12,5 @@ Description here.
 Example <integration-name> integrate command: 
 
 ```
-juju integrate <charm-name> <supported-charm>:<integration-name>
+juju integrate opendkim <supported-charm>:<integration-name>
 ```
