@@ -34,8 +34,10 @@ assumes:
   - juju >= 3.6
 
 charm-libs:
-- lib: operator_libs_linux.systemd
-  version: '1'
+  - lib: operator_libs_linux.systemd
+    version: "1"
+  - lib: grafana_agent.cos_agent
+    version: "0"
 
 config:
   options:
@@ -69,7 +71,7 @@ config:
          without the '.private' extension, and the value the private key.
     mode:
       type: string
-      default: 'sv'
+      default: "sv"
       description: |
         Selects operating modes. The string is a concatenation of
         characters that indicate which mode(s) of operation are
