@@ -1,22 +1,15 @@
-# opendkim Operator
+# Opendkim Operator
 
-<!-- A single sentence that says what the product is, succinctly and memorably. Add a 1-2 sentence description of what the charm software does. -->
+A [Juju](https://juju.is/) [charm](https://documentation.ubuntu.com/juju/3.6/reference/charm/) deploying and
+managing [OpenDKIM](http://www.opendkim.org/) on machines.
 
-A [Juju](https://juju.is/) [charm](https://documentation.ubuntu.com/juju/3.6/reference/charm/) deploying and managing <Charm software> on 
-Kubernetes. 
-
-<!-- A paragraph of 2-5 short sentences, that describes what the product does and what need the product meets. -->
+The Opendkim charm installs and configures the [OpenDKIM](http://www.opendkim.org/) application and offers
+other charms the ability to sign and validate email messages using the `milter` relation.
 
 Like any Juju charm, this charm supports one-line deployment, configuration, integration, scaling, and more. 
-For opendkim, this includes:
-* list or summary of app-specific features
+For opendkim.
 
-The opendkim charm allows for deployment on many different Kubernetes platforms, from [MicroK8s](https://microk8s.io/) to 
-[Charmed Kubernetes](https://ubuntu.com/kubernetes) to public cloud Kubernetes offerings.
-
-<!-- Finally, a paragraph that describes whom the product is useful for. -->
-
-This charm will make operating <charm-software> simple and straightforward for DevOps or SRE teams through Juju's clean interface. 
+This charm will make operating OpenDKIM simple and straightforward for email adminitration teams through Juju's clean interface.
 
 ## In this documentation
 
@@ -38,7 +31,7 @@ If there's a particular area of documentation that you'd like to see that's miss
 
 ## Project and community
 
-The opendkim Operator is a member of the Ubuntu family. It's an open-source project that warmly welcomes community 
+The OpenDKIM operator is a member of the Ubuntu family. It's an open-source project that warmly welcomes community
 projects, contributions, suggestions, fixes, and constructive feedback.
 
 - [Code of conduct](https://ubuntu.com/community/code-of-conduct)
