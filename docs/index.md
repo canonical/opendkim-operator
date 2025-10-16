@@ -42,9 +42,19 @@ projects, contributions, suggestions, fixes, and constructive feedback.
 Thinking about using the OpenDKIM Operator for your next project? 
 [Get in touch](https://matrix.to/#/#charmhub-charmdev:ubuntu.com)!
 
+
 # Contents
 
-1. [Tutorial](link to tutorial)
-1. [How-to](link to how-to)
-1. [Reference](link to reference)
-1. [Explanation](link to explanation)
+1. [How-to]()
+  1. [Integrate with COS](how-to/integrate-with-cos.md)
+  1. [Contribute](how-to/contribute.md)
+1. [Reference]()
+  1. [Actions](reference/actions.md)
+  1. [Configurations](reference/configurations.md)
+  1. [Integrations](reference/integrations.md)
+  1. [Metrics](reference/metrics.md)
+1. [Explanation]()
+  1. [Charm architecture](explanation/charm-architecture.md)
+  1. [Security](explanation/security.md)
+1. [Release notes]()
+  1. [Overview](release-notes/landing-page.md)
