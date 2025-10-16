@@ -5,7 +5,7 @@ At its core, the OpenDKIM charm is an operator for managing OpenDKIM that provid
 The OpenDKIM charm is a machine charm that manages the OpenDKIM package. The OpenDKIM charm follows a holistic approach, calling
 a main reconcile method for the Juju events not related to installing the OpenDKIM package.
 
-## High-level overview of opendkim deployment
+## High-level overview of OpenDKIM deployment
 
 The following diagram shows a typical deployment of the OpenDKIM charm.
 <!-- 
