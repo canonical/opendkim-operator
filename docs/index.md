@@ -1,4 +1,4 @@
-# Opendkim Operator
+# OpenDKIM operator
 
 A [Juju](https://juju.is/) [charm](https://documentation.ubuntu.com/juju/3.6/reference/charm/) deploying and
 managing [OpenDKIM](http://www.opendkim.org/) on machines.
