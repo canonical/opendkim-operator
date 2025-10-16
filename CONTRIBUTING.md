@@ -150,7 +150,7 @@ juju add-model charm-dev
 # Enable DEBUG logging
 juju model-config logging-config="<root>=INFO;unit=DEBUG"
 # Deploy the charm
-juju deploy ./opendkim.charm 
+juju deploy ./opendkim_amd64.charm
 ```
 
 

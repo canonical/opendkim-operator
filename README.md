@@ -10,15 +10,16 @@ Use links instead.
 <!--
 NOTE: This template has the documentation under the `docs-template` due with issues with discourse-gatekeeper. The `docs-template` directory must be changed to `docs` after using this template to ensure discourse-gatekeeper correctly identifies the documentation changes.
 -->
-# Platform engineering charm template
+# OpenDKIM charm
 <!-- Use this space for badges -->
 
-Describe your charm in 1-2 sentences. Include the software that the charm deploys (if applicable), and the substrate (VM/K8s).
+A [Juju](https://juju.is/) [charm](https://documentation.ubuntu.com/juju/3.6/reference/charm/) deploying and
+managing [OpenDKIM](http://www.opendkim.org/) on machines.
 
-Like any Juju charm, this charm supports one-line deployment, configuration, integration, scaling, and more. For Charmed {Name}, this includes:
-* list or summary of app-specific features
+Like any Juju charm, this charm supports one-line deployment, configuration, integration, scaling, and more.
 
-For information about how to deploy, integrate, and manage this charm, see the Official [platform-engineering-charm-template Documentation](external link).
+
+For information about how to deploy, integrate, and manage this charm, see the Official [opendkim Documentation](https://charmhub.io/opendkim).
 
 ## Get started
 <!--If the charm already contains a relevant how-to guide or tutorial in its documentation,
