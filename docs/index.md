@@ -9,7 +9,7 @@ other charms the ability to sign and validate email messages using the `milter` 
 Like any Juju charm, this charm supports one-line deployment, configuration, integration, scaling, and more. 
 For opendkim.
 
-This charm will make operating OpenDKIM simple and straightforward for email adminitration teams through Juju's clean interface.
+This charm will make operating OpenDKIM simple and straightforward for email administration teams through Juju's clean interface.
 
 ## In this documentation
 

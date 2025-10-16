@@ -18,8 +18,10 @@ managing [OpenDKIM](http://www.opendkim.org/) on machines.
 
 Like any Juju charm, this charm supports one-line deployment, configuration, integration, scaling, and more.
 
+The OpenDKIM charm installs and configures the [OpenDKIM](http://www.opendkim.org/) application and offers
+other charms the ability to sign and validate email messages using the `milter` relation.
 
-For information about how to deploy, integrate, and manage this charm, see the Official [opendkim Documentation](https://charmhub.io/opendkim).
+For information about how to deploy, integrate, and manage this charm, see the Official [OpenDKIM Documentation](https://charmhub.io/opendkim/docs).
 
 ## Get started
 <!--If the charm already contains a relevant how-to guide or tutorial in its documentation,
@@ -66,9 +68,9 @@ exhaustive or always relevant for every charm. If there is no official troublesh
 include a link to the relevant Matrix channel.
 -->
 
-* [Read more]() <!--Link to the charm's official documentation-->
-* [Developer documentation]() <!--Link to any developer documentation (could be upstream)-->
-* [Official webpage]() <!--(Optional) Link to official upstream webpage/blog/marketing content--> 
+* [Read more](https://charmhub.io/opendkim) <!--Link to the charm's official documentation-->
+* [Developer documentation](http://www.opendkim.org/docs.html) <!--Link to any developer documentation (could be upstream)-->
+* [Official webpage](http://www.opendkim.org/) <!--(Optional) Link to official upstream webpage/blog/marketing content-->
 * [Troubleshooting]() <!--(Optional) Link to a page or section about troubleshooting/FAQ-->
 
 ## Project and community

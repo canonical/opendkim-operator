@@ -1,6 +1,6 @@
 # Contributing
 
-This document explains the processes and practices recommended for contributing enhancements to the opendkim charm.
+This document explains the processes and practices recommended for contributing enhancements to the OpenDKIM charm.
 
 ## Overview
 

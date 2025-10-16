@@ -2,15 +2,15 @@
 
 <!-- Use the template below to add information about integrations supported by this charm. -->
 
-### Integration example
+### milter integration
 
-_Interface_:   
-_Supported charms_: 
+_Interface_:   milter
+_Supported charms_: smtp-relay, postfix-relay
 
-Description here.
+The milter integration offers the signing and verification of emails to other charms.
 
-Example <integration-name> integrate command: 
+For Example, to integrate with the `postfix-relay` charm:
 
 ```
-juju integrate opendkim <supported-charm>:<integration-name>
+juju integrate opendkim postfix-relay:milter
 ```

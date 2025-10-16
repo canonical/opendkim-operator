@@ -54,26 +54,6 @@ The following diagram shows the architecture of the opendkim charm:
      How is the charm containerized? Include those separate pieces in this diagram.
 -->
 
-### Containers
-
-Configuration files for the containers can be found in the respective directories that define the rock.
-
-<!--
-#### Container example
-
-Description of container.
-
-The workload that this container is running is defined in the [<container-name> rock](link to rock).
--->
-
-## OCI images
-
-We use [Rockcraft](https://canonical-rockcraft.readthedocs-hosted.com/en/latest/) to build OCI Images for opendkim.
-The images are defined in [opendkim rock](link to rock).
-They are published to [Charmhub](https://charmhub.io/), the official repository of charms.
-
-> See more: [How to publish your charm on Charmhub](https://canonical-charmcraft.readthedocs-hosted.com/en/stable/howto/manage-charms/#publish-a-charm-on-charmhub)
-
 ## Metrics
 
 <!--
