@@ -22,12 +22,18 @@ The following diagram shows a typical deployment of the OpenDKIM charm.
 -->
 
 ```mermaid
-graph TD;
-    user[User] --> posfix-relay[postfix-relay];
-    subgraph " "
-	    posfix-relay[postfix-relay] <-->|milter| OpenDKIM
-    end;
-    posfix-relay[postfix-relay] --> other-smtp-server
+C4Container
+    Person(user, "User", "Sends emails")
+    Container(otherSmtpServer, "Other SMTP Server", "SMTP Server", "Destination mail server")
+
+    Boundary(mailSystem, "Mail Relay System") {
+        Container(posfixRelay, "postfix-relay", "SMTP Relay", "Handles mail relaying and filtering")
+        Container(OpenDKIM, "OpenDKIM", "DKIM", "Performs DKIM signing and verification")
+    }
+
+    Rel(user, posfixRelay, "Sends email")
+    Rel(posfixRelay, OpenDKIM, "Uses milter interface")
+    Rel(posfixRelay, otherSmtpServer, "Relays email to")
 ```
 
 The OpenDKIM charm provides DKIM signing and validation for other charms, and will integrate with charms like `postfix-relay`.
