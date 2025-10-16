@@ -2,7 +2,7 @@
 
 <!-- Use the template below to add information about integrations supported by this charm. -->
 
-### milter integration
+### Milter integration
 
 _Interface_:   milter
 _Supported charms_: smtp-relay, postfix-relay
