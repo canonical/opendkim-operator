@@ -39,7 +39,7 @@ projects, contributions, suggestions, fixes, and constructive feedback.
 - [Join our online chat](https://matrix.to/#/#charmhub-charmdev:ubuntu.com)
 - [Contribute](link to Contribute page)
 
-Thinking about using the opendkim Operator for your next project? 
+Thinking about using the OpenDKIM Operator for your next project? 
 [Get in touch](https://matrix.to/#/#charmhub-charmdev:ubuntu.com)!
 
 # Contents

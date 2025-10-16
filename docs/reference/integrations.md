@@ -5,7 +5,7 @@
 ### Milter integration
 
 _Interface_:   milter
-_Supported charms_: smtp-relay, postfix-relay
+_Supported charms_: postfix-relay
 
 The milter integration offers the signing and verification of emails to other charms.
 

@@ -25,12 +25,12 @@ The following diagram shows a typical deployment of the OpenDKIM charm.
 graph TD;
     user[User] --> posfix-relay[postfix-relay];
     subgraph " "
-	    posfix-relay[postfix-relay] <-->|milter| opendkim
+	    posfix-relay[postfix-relay] <-->|milter| OpenDKIM
     end;
     posfix-relay[postfix-relay] --> other-smtp-server
 ```
 
-The OpenDKIM charm provides DKIM signing and validation for other charms, and will integrate with charms like `postfix-relay` and `smtp-relay`.
+The OpenDKIM charm provides DKIM signing and validation for other charms, and will integrate with charms like `postfix-relay`.
 
 ## Metrics
 
