@@ -85,10 +85,7 @@ include a link to the relevant Matrix channel.
 * [Troubleshooting]() <!--(Optional) Link to a page or section about troubleshooting/FAQ-->
 
 ## Project and community
-* [Issues]() <!--Link to GitHub issues (if applicable)-->
-* [Contributing]() <!--Link to any contribution guides, preferably for the source code--> 
-* [Matrix]() <!--Link to contact info (if applicable), e.g. Matrix channel-->
-* [Launchpad]() <!--Link to Launchpad (if applicable)-->
-
-## Licensing and trademark (optional)
+* [Issues](https://github.com/canonical/opendkim-operator/issues)
+* [Contributing](https://github.com/canonical/opendkim-operator/blob/main/CONTRIBUTING.md)
+* [Matrix](https://matrix.to/#/#charmhub-charmdev:ubuntu.com)
 
