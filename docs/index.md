@@ -3,7 +3,7 @@
 A [Juju](https://juju.is/) [charm](https://documentation.ubuntu.com/juju/3.6/reference/charm/) deploying and
 managing [OpenDKIM](http://www.opendkim.org/) on machines.
 
-The Opendkim charm installs and configures the [OpenDKIM](http://www.opendkim.org/) application and offers
+The OpenDKIM charm installs and configures the [OpenDKIM](http://www.opendkim.org/) application and offers
 other charms the ability to sign and validate email messages using the `milter` relation.
 
 Like any Juju charm, this charm supports one-line deployment, configuration, integration, scaling, and more. 

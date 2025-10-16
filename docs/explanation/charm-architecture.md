@@ -1,37 +1,13 @@
 # Charm architecture
 
-Add overview material here:
+At its core, the OpenDKIM charm is an operator for managing OpenDKIM that provides the  milter relation for providing DKIM service.
 
-1. What kind of application is it? What kind of software does it use?
-2. Describe Pebble services.
-
-<!-- Example text
-At its core, the opendkim charm is <software> that does <brief description>.
-
-The charm design leverages the [sidecar](https://kubernetes.io/blog/2015/06/the-distributed-system-toolkit-patterns/#example-1-sidecar-containers) pattern to allow multiple containers in each pod with [Pebble](https://documentation.ubuntu.com/juju/3.6/reference/pebble/) running as the workload container’s entrypoint.
-
-Pebble is a lightweight, API-driven process supervisor that is responsible for configuring processes to run in a container and controlling those processes throughout the workload lifecycle.
-
-Pebble `services` are configured through [layers](https://github.com/canonical/pebble#layer-specification), and the following containers represent each one a layer forming the effective Pebble configuration, or `plan`:
-
-1. Container 1, which does this and that.
-2. Container 2, which does that and this.
-3. And so on.
-
-
-As a result, if you run a `kubectl get pods` on a namespace named for the Juju model you've deployed the opendkim charm into, you'll see something like the following:
-
-```bash
-NAME                             READY   STATUS    RESTARTS   AGE
-opendkim-0                   N/N     Running   0         6h4m
-```
-
-This shows there are <NUMBER> containers - <describe what the containers are>.
--->
+The OpenDKIM charm is a machine charm that manages the OpenDKIM package. The OpenDKIM charm follows a holistic approach, calling
+a main reconcile method for the Juju events not related to installing the OpenDKIM package.
 
 ## High-level overview of opendkim deployment
 
-The following diagram shows a typical deployment of the opendkim charm.
+The following diagram shows a typical deployment of the OpenDKIM charm.
 <!-- 
     Provide a brief description of the deployment here. Is it a Kubernetes cloud, a VM, or both?
     What other charms are included in this deployment? 
@@ -45,14 +21,16 @@ The following diagram shows a typical deployment of the opendkim charm.
      can be found in https://canonical-platform-engineering.readthedocs-hosted.com/en/latest/engineering-practices/documentation/architecture-diagram-guidance/
 -->
 
-## Charm architecture
+```mermaid
+graph TD;
+    user[User] --> posfix-relay[postfix-relay];
+    subgraph " "
+	    posfix-relay[postfix-relay] <-->|milter| opendkim
+    end;
+    posfix-relay[postfix-relay] --> other-smtp-server
+```
 
-The following diagram shows the architecture of the opendkim charm:
-
-<!-- Include a Mermaid diagram of the charm here. 
-     Limit the scope of this diagram to the charm only.
-     How is the charm containerized? Include those separate pieces in this diagram.
--->
+The OpenDKIM charm provides DKIM signing and validation for other charms, and will integrate with charms like `postfix-relay` and `smtp-relay`.
 
 ## Metrics
 
@@ -68,6 +46,9 @@ See [metrics](link-to-metrics-document) for more information.
 
 For this charm, the following Juju events are observed:
 
+1. `install` and `upgrade_charm` install OpenDKIM.
+2. `config_changed` and `secret_changed` call reconcile for the charm.
+3. For the milter relation, `relation_changed` and `relation_departed` call reconcile for the charm.
 <!--
 Numbered list of Juju events. Link to describe the event in more detail (either in Juju docs or in a specific charm's docs). When is the event fired? What does the event indicate/mean?
 -->
@@ -76,27 +57,10 @@ Numbered list of Juju events. Link to describe the event in more detail (either 
 
 ## Charm code overview
 
-The `src/charm.py` is the default entry point for a charm and has the <relevant-charm-class> Python class which inherits
+The `src/charm.py` is the default entry point for a charm and has the OpenDKIMCharm Python class which inherits
 from CharmBase. CharmBase is the base class from which all charms are formed, defined
 by [Ops](https://ops.readthedocs.io/en/latest/index.html) (Python framework for developing charms).
 
 > See more in the Juju docs: [Charm](https://documentation.ubuntu.com/juju/latest/user/reference/charm/)
 
 The `__init__` method guarantees that the charm observes all events relevant to its operation and handles them.
-
-Take, for example, when a configuration is changed by using the CLI.
-
-1. User runs the configuration command:
-
-```bash
-juju config <relevant-charm-configuration>
-```
-
-2. A `config-changed` event is emitted.
-3. In the `__init__` method is defined how to handle this event like this:
-
-```python
-self.framework.observe(self.on.config_changed, self._on_config_changed)
-```
-
-4. The method `_on_config_changed`, for its turn, will take the necessary actions such as waiting for all the relations to be ready and then configuring the containers.
