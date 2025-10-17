@@ -82,7 +82,7 @@ include a link to the relevant Matrix channel.
 * [Read more](https://charmhub.io/opendkim) <!--Link to the charm's official documentation-->
 * [Developer documentation](http://www.opendkim.org/docs.html) <!--Link to any developer documentation (could be upstream)-->
 * [Official webpage](http://www.opendkim.org/) <!--(Optional) Link to official upstream webpage/blog/marketing content-->
-* [Troubleshooting]() <!--(Optional) Link to a page or section about troubleshooting/FAQ-->
+* [Troubleshooting](https://matrix.to/#/#charmhub-charmdev:ubuntu.com) 
 
 ## Project and community
 * [Issues](https://github.com/canonical/opendkim-operator/issues)
