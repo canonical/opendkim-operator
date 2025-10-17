@@ -1,4 +1,4 @@
-<!-- Remember to update this file for your charm -- replace <charm-name> with the appropriate name,
+<!-- Remember to update this file for your charm -- replace opendkim with the appropriate name,
 specify the track the release notes will follow, and include a link on how to upgrade. -->
 
 # Release notes

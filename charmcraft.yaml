@@ -3,9 +3,10 @@
 
 type: charm
 name: opendkim
-title: OpenDKIM charm.
+title: Charmed OpenDKIM
 summary: Open source milter for providing DKIM service
 links:
+  documentation: https://discourse.charmhub.io/t/opendkim-docs-overview/19035
   issues: https://github.com/canonical/opendkim-operator/issues
   source: https://github.com/canonical/opendkim-operator
   contact: https://launchpad.net/~canonical-is-devops
