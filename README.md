@@ -27,7 +27,7 @@ For information about how to deploy, integrate, and manage this charm, see the O
 
 The OpenDKIM charm offers signing and validation DKIM services through the `milter`
 relation. To configure it you need to set the `signingtable` , `keytable` and `private-keys` and 
-configuration options ([see OpenDKIM Configurations](https://charmhub.io/opendkim/docs)
+configuration options ([see OpenDKIM Configurations](https://charmhub.io/opendkim/configurations)
 for more information).
 
 Provision a Juju environment then deploy the OpenDKIM charm with:
