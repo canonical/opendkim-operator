@@ -63,8 +63,8 @@ Configure the `signingtable` and `keytable` configuration options to match the f
 private key and the desired configuration:
 
 ```
-juju config signingtable='[["selector._domainkey.example.com", "example.com:selector:/etc/dkimkeys/keyfilename.private"]]'
-juju config keytable='[["*@example.com", "selector._domainkey.example.com"]]'
+juju config opendkim signingtable='[["selector._domainkey.example.com", "example.com:selector:/etc/dkimkeys/keyfilename.private"]]'
+juju config opendkim keytable='[["*@example.com", "selector._domainkey.example.com"]]'
 ```
 
 For more information, see the
