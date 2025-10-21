@@ -8,18 +8,6 @@ a main reconcile method for the Juju events not related to installing the OpenDK
 ## High-level overview of OpenDKIM deployment
 
 The following diagram shows a typical deployment of the OpenDKIM charm.
-<!-- 
-    Provide a brief description of the deployment here. Is it a Kubernetes cloud, a VM, or both?
-    What other charms are included in this deployment? 
--->
-
-<!-- Include a Mermaid diagram of the charm deployment here. 
-     Use one container per charm; the point of this high-level overview is to show
-     a typical deployment and not provide a detailed breakdown of any of the charms.
-     Provide a brief description of the relations (for instance, "provides connection",
-     "caches storage", or "provides database"). More information on how to create mermaid diagrams
-     can be found in https://canonical-platform-engineering.readthedocs-hosted.com/en/latest/engineering-practices/documentation/architecture-diagram-guidance/
--->
 
 ```mermaid
 C4Container
@@ -58,9 +46,6 @@ For this charm, the following Juju events are observed:
 1. `install` and `upgrade_charm` install OpenDKIM.
 2. `config_changed` and `secret_changed` call reconcile for the charm.
 3. For the milter relation, `relation_changed` and `relation_departed` call reconcile for the charm.
-<!--
-Numbered list of Juju events. Link to describe the event in more detail (either in Juju docs or in a specific charm's docs). When is the event fired? What does the event indicate/mean?
--->
 
 > See more in the Juju docs: [Hook](https://documentation.ubuntu.com/juju/latest/user/reference/hook/)
 
