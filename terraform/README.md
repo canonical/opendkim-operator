@@ -1,6 +1,6 @@
 # opendkim Terraform module
 
-This folder contains a base [Terraform][Terraform] module for the opendkim charm.
+This folder contains a base [Terraform][Terraform] module for the OpenDKIM charm.
 
 The module uses the [Terraform Juju provider][Terraform Juju provider] to model the charm
 deployment onto any Kubernetes environment managed by [Juju][Juju].
