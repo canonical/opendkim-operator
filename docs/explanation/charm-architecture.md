@@ -34,6 +34,9 @@ C4Container
     Rel(user, posfixRelay, "Sends email")
     Rel(posfixRelay, OpenDKIM, "Uses milter interface")
     Rel(posfixRelay, otherSmtpServer, "Relays email to")
+    UpdateRelStyle(user, posfixRelay, $offsetY="-20", $offsetX="5")
+    UpdateRelStyle(posfixRelay, OpenDKIM, $offsetY="-10", $offsetX="-20")
+    UpdateRelStyle(posfixRelay, otherSmtpServer, $offsetY="-20", $offsetX="0")
 ```
 
 The OpenDKIM charm provides DKIM signing and validation for other charms, and will integrate with charms like `postfix-relay`.
