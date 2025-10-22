@@ -3,7 +3,7 @@
 
 variables {
   channel = "2/edge"
-  # renovate: depName="charm_name"
+  # renovate: depName="opendkim"
   revision = 1
 }
 

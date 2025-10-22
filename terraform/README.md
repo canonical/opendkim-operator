@@ -1,57 +1,18 @@
-# opendkim Terraform module
+# Terraform modules
 
-This folder contains a base [Terraform][Terraform] module for the OpenDKIM charm.
+This project contains the [Terraform][Terraform] modules to deploy the 
+`opendkim` charm with its dependencies.
 
-The module uses the [Terraform Juju provider][Terraform Juju provider] to model the charm
-deployment onto any Kubernetes environment managed by [Juju][Juju].
+The modules use the [Terraform Juju provider][Terraform Juju provider] to model
+the bundle deployment onto any Kubernetes environment managed by [Juju][Juju].
 
 ## Module structure
 
 - **main.tf** - Defines the Juju application to be deployed.
-- **variables.tf** - Allows customization of the deployment. Also models the charm configuration, 
-  except for exposing the deployment options (Juju model name, channel or application name).
-- **output.tf** - Integrates the module with other Terraform modules, primarily
-  by defining potential integration endpoints (charm integrations), but also by exposing
-  the Juju application name.
-- **versions.tf** - Defines the Terraform provider version.
+- **variables.tf** - Allows customization of the deployment including Juju model name, charm's channel and configuration.
+- **output.tf** - Responsible for integrating the module with other Terraform modules, primarily by defining potential integration endpoints (charm integrations).
+- **versions.tf** - Defines the Terraform provider.
 
-## Using opendkim base module in higher level modules
-
-If you want to use `opendkim` base module as part of your Terraform module, import it
-like shown below:
-
-```text
-data "juju_model" "my_model" {
-  name = var.model
-}
-
-module "opendkim" {
-  source = "git::https://github.com/canonical/opendkim-operator//terraform"
-  
-  model = juju_model.my_model.name
-  # (Customize configuration variables here if needed)
-}
-```
-
-Create integrations, for instance:
-
-```text
-resource "juju_integration" "opendkim-loki" {
-  model = juju_model.my_model.name
-  application {
-    name     = module.opendkim.app_name
-    endpoint = module.opendkim.endpoints.logging
-  }
-  application {
-    name     = "loki-k8s"
-    endpoint = "logging"
-  }
-}
-```
-
-The complete list of available integrations can be found [in the Integrations tab][opendkim-integrations].
-
-[Terraform]: https://developer.hashicorp.com/terraform
+[Terraform]: https://www.terraform.io/
 [Terraform Juju provider]: https://registry.terraform.io/providers/juju/juju/latest
 [Juju]: https://juju.is
-[opendkim-integrations]: https://charmhub.io/opendkim/integrations

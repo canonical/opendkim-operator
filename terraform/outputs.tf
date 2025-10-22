@@ -3,11 +3,11 @@
 
 output "app_name" {
   description = "Name of the deployed application."
-  value       = juju_application.charm_name.name
+  value       = juju_application.opendkim.name
 }
 
-output "endpoints" {
+output "provides" {
   value = {
-    ingress = "ingress"
+    milter = "milter"
   }
 }
