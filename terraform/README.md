@@ -1,7 +1,7 @@
 # Terraform modules
 
 This project contains the [Terraform][Terraform] modules to deploy the 
-`ubuntu-motd-server` charm with its dependencies.
+`opendkim` charm with its dependencies.
 
 The modules use the [Terraform Juju provider][Terraform Juju provider] to model
 the bundle deployment onto any Kubernetes environment managed by [Juju][Juju].
