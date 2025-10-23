@@ -13,7 +13,7 @@ links:
 description: |
   A [Juju](https://juju.is/) [charm](https://juju.is/docs/olm/charmed-operators)
   deploying and managing [OpenDKIM](http://www.opendkim.org/) on machines.
-  
+
   OpenDKIM is a community effort to develop and maintain a C library for
   producing DKIM-aware applications and an open source milter for providing DKIM service.
 
@@ -29,6 +29,9 @@ parts:
 provides:
   milter:
     interface: milter
+  cos-agent:
+    interface: cos_agent
+    limit: 1
 
 assumes:
   - juju >= 3.6
