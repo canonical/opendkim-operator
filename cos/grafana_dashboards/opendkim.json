@@ -24,8 +24,8 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 19,
   "links": [],
+  "liveNow": false,
   "panels": [
     {
       "collapsed": false,
@@ -33,7 +33,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 1
+        "y": 0
       },
       "id": 17,
       "panels": [],
@@ -132,7 +132,7 @@
             "type": "prometheus",
             "uid": "${prometheusds}"
           },
-          "expr": "cpu_usage_user{cpu=\"cpu-total\",juju_model=~\"$juju_model\",juju_unit=~\"$juju_dkim_signing_unit\",juju_charm=\"smtp-dkim-signing\"}",
+          "expr": "cpu_usage_user{cpu=\"cpu-total\",juju_model=~\"$juju_model\",juju_unit=~\"$juju_unit\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -145,7 +145,7 @@
             "type": "prometheus",
             "uid": "${prometheusds}"
           },
-          "expr": "cpu_usage_system{cpu=\"cpu-total\",juju_model=~\"$juju_model\",juju_unit=~\"$juju_smtp_relay_unit\",juju_charm=\"smtp-relay\"}",
+          "expr": "cpu_usage_system{cpu=\"cpu-total\",juju_model=~\"$juju_model\",juju_unit=~\"$juju_unit\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -158,7 +158,7 @@
             "type": "prometheus",
             "uid": "${prometheusds}"
           },
-          "expr": "cpu_usage_iowait{cpu=\"cpu-total\",juju_model=~\"$juju_model\",juju_unit=~\"$juju_smtp_relay_unit\",juju_charm=\"smtp-relay\"}",
+          "expr": "cpu_usage_iowait{cpu=\"cpu-total\",juju_model=~\"$juju_model\",juju_unit=~\"$juju_unit\"}",
           "interval": "",
           "legendFormat": "{{juju_model}} {{juju_unit}} iowait",
           "refId": "C"
@@ -261,7 +261,7 @@
             "type": "prometheus",
             "uid": "${prometheusds}"
           },
-          "expr": "netstat_tcp_established{juju_model=~\"$juju_model\",juju_unit=~\"$juju_dkim_signing_unit\",juju_charm=\"smtp-dkim-signing\"}",
+          "expr": "netstat_tcp_established{juju_model=~\"$juju_model\",juju_unit=~\"$juju_opendkim_unit\"}",
           "interval": "",
           "legendFormat": "{{juju_model}} {{juju_unit}} Established",
           "refId": "A"
@@ -275,7 +275,8 @@
   "refresh": "1m",
   "schemaVersion": 41,
   "tags": [
-    "is-services"
+    "is-services",
+    "charm: opendkim"
   ],
   "templating": {
     "list": [
@@ -406,7 +407,7 @@
           "type": "prometheus",
           "uid": "${prometheusds}"
         },
-        "definition": "label_values(postfix_queue_length{}, juju_model)",
+        "definition": "label_values(juju_model)",
         "hide": 0,
         "includeAll": true,
         "label": "Juju Model",
@@ -414,41 +415,10 @@
         "name": "juju_model",
         "options": [],
         "query": {
-          "query": "label_values(postfix_queue_length{}, juju_model)",
+          "query": "label_values(juju_model)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
-        "type": "query"
-      },
-      {
-        "current": {
-          "selected": true,
-          "text": [
-            "All"
-          ],
-          "value": [
-            "$__all"
-          ]
-        },
-        "datasource": {
-          "type": "prometheus",
-          "uid": "${prometheusds}"
-        },
-        "definition": "label_values(postfix_queue_length{host=~\"^$juju_model.*\"}, host)",
-        "hide": 0,
-        "includeAll": true,
-        "label": "SMTP Unit",
-        "multi": true,
-        "name": "juju_smtp_relay_unit",
-        "options": [],
-        "query": {
-          "query": "label_values(postfix_queue_length{host=~\"^$juju_model.*\"}, host)",
-          "refId": "GS2-juju_smtp_relay_unit-Variable-Query"
-        },
-        "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
@@ -463,6 +433,6 @@
   "timepicker": {},
   "timezone": "utc",
   "title": "Mail",
-  "uid": "000000019",
-  "version": 34
+  "version": 1,
+  "weekStart": ""
 }
