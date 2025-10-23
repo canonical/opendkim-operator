@@ -43,7 +43,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "tAK-5_jnz"
+        "uid": "${prometheusds}"
       },
       "fieldConfig": {
         "defaults": {
@@ -130,7 +130,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "tAK-5_jnz"
+            "uid": "${prometheusds}"
           },
           "expr": "cpu_usage_user{cpu=\"cpu-total\",juju_model=~\"$juju_model\",juju_unit=~\"$juju_dkim_signing_unit\",juju_charm=\"smtp-dkim-signing\"}",
           "format": "time_series",
@@ -143,7 +143,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "tAK-5_jnz"
+            "uid": "${prometheusds}"
           },
           "expr": "cpu_usage_system{cpu=\"cpu-total\",juju_model=~\"$juju_model\",juju_unit=~\"$juju_smtp_relay_unit\",juju_charm=\"smtp-relay\"}",
           "format": "time_series",
@@ -156,7 +156,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "tAK-5_jnz"
+            "uid": "${prometheusds}"
           },
           "expr": "cpu_usage_iowait{cpu=\"cpu-total\",juju_model=~\"$juju_model\",juju_unit=~\"$juju_smtp_relay_unit\",juju_charm=\"smtp-relay\"}",
           "interval": "",
@@ -170,7 +170,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "tAK-5_jnz"
+        "uid": "${prometheusds}"
       },
       "fieldConfig": {
         "defaults": {
@@ -259,7 +259,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "tAK-5_jnz"
+            "uid": "${prometheusds}"
           },
           "expr": "netstat_tcp_established{juju_model=~\"$juju_model\",juju_unit=~\"$juju_dkim_signing_unit\",juju_charm=\"smtp-dkim-signing\"}",
           "interval": "",
