@@ -11,7 +11,7 @@ import typing
 from pathlib import Path
 
 import ops
-from charmlibs import apt
+from charms.grafana_agent.v0.cos_agent import COSAgentProvider
 from charms.operator_libs_linux.v1 import systemd
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
@@ -50,6 +50,16 @@ class OpenDKIMCharm(ops.CharmBase):
         self.framework.observe(self.on[MILTER_RELATION_NAME].relation_changed, self._reconcile)
         self.framework.observe(self.on[MILTER_RELATION_NAME].relation_departed, self._reconcile)
         self.unit.open_port("tcp", OPENDKIM_MILTER_PORT)
+
+        self._grafana_agent = COSAgentProvider(
+            self,
+            metrics_endpoints=[
+                {"path": "/metrics", "port": 9103},
+            ],
+            dashboard_dirs=[COS_DIRPATH / "grafana_dashboards"],
+            metrics_rules_dir=COS_DIRPATH / "prometheus_alert_rules",
+            logs_rules_dir=COS_DIRPATH / "loki_alert_rules",
+        )
 
     def _install(self, _: ops.EventBase) -> None:
         """Install opendkim package."""
