@@ -4,7 +4,7 @@
 variable "app_name" {
   description = "Name of the application in the Juju model."
   type        = string
-  default     = "<charm-name>"
+  default     = "opendkim"
 }
 
 variable "base" {
@@ -16,11 +16,11 @@ variable "base" {
 variable "channel" {
   description = "The channel to use when deploying a charm."
   type        = string
-  default     = "latest/stable"
+  default     = "2/stable"
 }
 
 variable "config" {
-  description = "Application config. Details about available options can be found at https://charmhub.io/<charm-name>/configurations."
+  description = "Application config. Details about available options can be found at https://charmhub.io/opendkim/configurations."
   type        = map(string)
   default     = {}
 }
