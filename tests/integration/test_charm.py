@@ -189,3 +189,64 @@ def test_opendkim_testkey_failed_validation_(juju: jubilant.Juju, opendkim_app, 
     )
     status = juju.status()
     assert "Wrong opendkim configuration" in status.apps[opendkim_app].app_status.message
+
+
+@pytest.mark.abort_on_fail
+def test_metrics_configured(juju: jubilant.Juju, opendkim_app, smtp_relay_app, machine_ip_address):
+    """
+    arrange: Deploy postfix-relay.
+    act: Get the metrics from the unit.
+    assert: The metrics can be scraped and there are metrics.
+    """
+    status = juju.status()
+    unit = list(status.apps[opendkim_app].units.values())[0]
+    unit_ip = unit.public_address
+
+    domain = "testrelay.internal"
+    selector = "default"
+    keyname = "testrelay-internal-default"
+    _, private_key = generate_opendkim_genkey(domain=domain, selector=selector)
+
+    try:
+        secret_id = juju.add_secret("opendkimsecret", {f"{keyname}": private_key})
+    except jubilant.CLIError as e:
+        secret_info = juju.show_secret("opendkimsecret")
+        secret_id = secret_info.uri
+        if "already exists" in e.stderr:
+            juju.update_secret(secret_id, {f"{keyname}": private_key})
+        else:
+            logger.error("Error adding secret %s %s", e.stderr, e.stdout)
+            raise e
+
+    juju.cli("grant-secret", secret_id, opendkim_app)
+    keytable = [
+        [f"{selector}._domainkey.{domain}", f"{domain}:{selector}:/etc/dkimkeys/{keyname}.private"]
+    ]
+    signingtable = [[f"*@{domain}", f"{selector}._domainkey.{domain}"]]
+    juju.config(
+        opendkim_app,
+        {
+            "keytable": json.dumps(keytable),
+            "signingtable": json.dumps(signingtable),
+            "private-keys": secret_id,
+        },
+    )
+
+    command_to_put_domain = f"echo {machine_ip_address} {domain} | sudo tee -a /etc/hosts"
+    juju.exec(machine=int(unit.machine), command=command_to_put_domain)
+
+    juju.config(smtp_relay_app, {"relay_domains": f"- {domain}"})
+    juju.wait(
+        lambda status: jubilant.all_active(status, opendkim_app, smtp_relay_app),
+        timeout=3 * 60,
+        delay=5,
+    )
+    metrics_output = requests.get(f"http://{unit_ip}:9103/metrics", timeout=5).text
+    # Some of the most important metrics used in the dashboard and alerts.
+    expected_metrics = [
+        "cpu_usage_idle",
+        "procstat_lookup_running",
+        "netstat_tcp_established",
+    ]
+    for expected_metric in expected_metrics:
+        assert expected_metric in metrics_output
