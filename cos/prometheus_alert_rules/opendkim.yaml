@@ -13,4 +13,4 @@ groups:
             OpenDKIM process not running on host {{ $labels.host }}
           summary: OpenDKIM process down {{ $labels.host }}
         labels:
-          severity: warning
+          severity: critical
