@@ -194,7 +194,7 @@ def test_opendkim_testkey_failed_validation_(juju: jubilant.Juju, opendkim_app, 
 @pytest.mark.abort_on_fail
 def test_metrics_configured(juju: jubilant.Juju, opendkim_app, smtp_relay_app, machine_ip_address):
     """
-    arrange: Deploy postfix-relay.
+    arrange: Deploy opendkim.
     act: Get the metrics from the unit.
     assert: The metrics can be scraped and there are metrics.
     """

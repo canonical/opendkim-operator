@@ -68,7 +68,7 @@ class OpenDKIMCharm(ops.CharmBase):
         )
 
     def _install(self, _: ops.EventBase) -> None:
-        """Install opendkim package."""
+        """Install opendkim package and telegraf snap."""
         self.unit.status = ops.MaintenanceStatus("installing opendkim")
         apt.add_package(package_names=OPENDKIM_PACKAGE_NAME, update_cache=True)
 
