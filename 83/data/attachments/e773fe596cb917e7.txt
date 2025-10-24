@@ -1,0 +1,498 @@
+13:11:57 [32mINFO[0m cli: juju add-model --no-switch jubilant-7243151c
+13:11:58 [32mINFO[0m cli: juju model-config --model jubilant-7243151c automatically-retry-hooks=true
+13:11:58 [32mINFO[0m IP Address for the current test runner: 10.151.33.241
+13:11:58 [32mINFO[0m cli: juju status --model jubilant-7243151c --format json
+13:11:58 [32mINFO[0m cli: juju deploy --model jubilant-7243151c ././opendkim_amd64.charm opendkim
+13:12:02 [32mINFO[0m wait: status changed:
++ .model.name = 'jubilant-7243151c'
++ .model.type = 'iaas'
++ .model.controller = 'github-pr-9d9d2-lxd'
++ .model.cloud = 'localhost'
++ .model.version = '3.6.11'
++ .model.region = 'localhost'
++ .model.model_status.current = 'available'
++ .machines['0'].juju_status.current = 'pending'
++ .machines['0'].instance_id = 'pending'
++ .machines['0'].machine_status.current = 'pending'
++ .machines['0'].modification_status.current = 'idle'
++ .machines['0'].base.name = 'ubuntu'
++ .machines['0'].base.channel = '24.04'
++ .machines['0'].constraints = 'arch=amd64'
++ .apps['opendkim'].charm = 'local:opendkim-0'
++ .apps['opendkim'].charm_origin = 'local'
++ .apps['opendkim'].charm_name = 'opendkim'
++ .apps['opendkim'].charm_rev = 0
++ .apps['opendkim'].exposed = False
++ .apps['opendkim'].base.name = 'ubuntu'
++ .apps['opendkim'].base.channel = '24.04'
++ .apps['opendkim'].app_status.current = 'waiting'
++ .apps['opendkim'].app_status.message = 'waiting for machine'
++ .apps['opendkim'].units['opendkim/0'].workload_status.current = 'waiting'
++ .apps['opendkim'].units['opendkim/0'].workload_status.message = 'waiting for machine'
++ .apps['opendkim'].units['opendkim/0'].juju_status.current = 'allocating'
++ .apps['opendkim'].units['opendkim/0'].machine = '0'
++ .apps['opendkim'].endpoint_bindings[''] = 'alpha'
++ .apps['opendkim'].endpoint_bindings['cos-agent'] = 'alpha'
++ .apps['opendkim'].endpoint_bindings['milter'] = 'alpha'
+13:12:05 [32mINFO[0m wait: status changed:
+- .machines['0'].machine_status.current = 'pending'
++ .machines['0'].machine_status.current = 'allocating'
++ .machines['0'].machine_status.message = 'Creating container'
+13:12:08 [32mINFO[0m wait: status changed:
+- .machines['0'].instance_id = 'pending'
+- .machines['0'].machine_status.current = 'allocating'
+- .machines['0'].machine_status.message = 'Creating container'
+- .machines['0'].modification_status.current = 'idle'
++ .machines['0'].instance_id = 'juju-7eca0a-0'
++ .machines['0'].machine_status.current = 'running'
++ .machines['0'].machine_status.message = 'Container started'
++ .machines['0'].modification_status.current = 'applied'
++ .machines['0'].hardware = 'arch=amd64 cores=0 mem=0M availability-zone=github-runner virt-type=container'
+13:12:13 [32mINFO[0m wait: status changed:
++ .machines['0'].dns_name = '10.1.172.208'
++ .machines['0'].ip_addresses[0] = '10.1.172.208'
+- .machines['0'].machine_status.message = 'Container started'
++ .machines['0'].machine_status.message = 'Running'
++ .apps['opendkim'].units['opendkim/0'].public_address = '10.1.172.208'
+13:12:39 [32mINFO[0m wait: status changed:
+- .machines['0'].juju_status.current = 'pending'
++ .machines['0'].juju_status.current = 'started'
++ .machines['0'].juju_status.version = '3.6.11'
++ .machines['0'].hostname = 'juju-7eca0a-0'
++ .machines['0'].network_interfaces['eth0'].ip_addresses[0] = '10.1.172.208'
++ .machines['0'].network_interfaces['eth0'].mac_address = '00:16:3e:8c:dc:5a'
++ .machines['0'].network_interfaces['eth0'].is_up = True
++ .machines['0'].network_interfaces['eth0'].gateway = '10.1.172.1'
++ .machines['0'].network_interfaces['eth0'].space = 'alpha'
+- .apps['opendkim'].app_status.message = 'waiting for machine'
++ .apps['opendkim'].app_status.message = 'agent initialising'
+- .apps['opendkim'].units['opendkim/0'].workload_status.message = 'waiting for machine'
++ .apps['opendkim'].units['opendkim/0'].workload_status.message = 'agent initialising'
++ .apps['opendkim'].units['opendkim/0'].juju_status.version = '3.6.11'
++ .apps['opendkim'].units['opendkim/0'].leader = True
+13:12:42 [32mINFO[0m wait: status changed:
+- .apps['opendkim'].app_status.current = 'waiting'
+- .apps['opendkim'].app_status.message = 'agent initialising'
+- .apps['opendkim'].units['opendkim/0'].workload_status.current = 'waiting'
+- .apps['opendkim'].units['opendkim/0'].workload_status.message = 'agent initialising'
+- .apps['opendkim'].units['opendkim/0'].juju_status.current = 'allocating'
++ .apps['opendkim'].app_status.current = 'maintenance'
++ .apps['opendkim'].app_status.message = 'installing opendkim'
++ .apps['opendkim'].units['opendkim/0'].workload_status.current = 'maintenance'
++ .apps['opendkim'].units['opendkim/0'].workload_status.message = 'installing opendkim'
++ .apps['opendkim'].units['opendkim/0'].juju_status.current = 'executing'
++ .apps['opendkim'].units['opendkim/0'].juju_status.message = 'running install hook'
+13:13:33 [32mINFO[0m wait: status changed:
+- .apps['opendkim'].app_status.current = 'maintenance'
+- .apps['opendkim'].app_status.message = 'installing opendkim'
+- .apps['opendkim'].units['opendkim/0'].workload_status.current = 'maintenance'
+- .apps['opendkim'].units['opendkim/0'].workload_status.message = 'installing opendkim'
++ .apps['opendkim'].app_status.current = 'waiting'
++ .apps['opendkim'].units['opendkim/0'].workload_status.current = 'waiting'
+- .apps['opendkim'].units['opendkim/0'].juju_status.message = 'running install hook'
++ .apps['opendkim'].units['opendkim/0'].juju_status.message = 'running leader-elected hook'
++ .apps['opendkim'].units['opendkim/0'].open_ports[0] = '8892/tcp'
+13:13:35 [32mINFO[0m wait: status changed:
+- .apps['opendkim'].app_status.current = 'waiting'
+- .apps['opendkim'].units['opendkim/0'].workload_status.current = 'waiting'
++ .apps['opendkim'].app_status.current = 'blocked'
++ .apps['opendkim'].app_status.message = 'empty signingtable configuration - empty keytable configuration - empty private-keys configuration'
++ .apps['opendkim'].units['opendkim/0'].workload_status.current = 'blocked'
++ .apps['opendkim'].units['opendkim/0'].workload_status.message = 'empty signingtable configuration - empty keytable configuration - empty private-keys configuration'
+- .apps['opendkim'].units['opendkim/0'].juju_status.message = 'running leader-elected hook'
++ .apps['opendkim'].units['opendkim/0'].juju_status.message = 'running start hook'
+13:13:36 [32mINFO[0m wait: status changed:
+- .apps['opendkim'].units['opendkim/0'].juju_status.current = 'executing'
+- .apps['opendkim'].units['opendkim/0'].juju_status.message = 'running start hook'
++ .apps['opendkim'].units['opendkim/0'].juju_status.current = 'idle'
+13:13:37 [32mINFO[0m cli: juju status --model jubilant-7243151c --format json
+13:13:37 [32mINFO[0m cli: juju deploy --model jubilant-7243151c smtp-relay smtp-relay
+13:13:38 [32mINFO[0m cli: juju integrate --model jubilant-7243151c smtp-relay opendkim
+13:13:39 [32mINFO[0m wait: status changed:
++ .model.name = 'jubilant-7243151c'
++ .model.type = 'iaas'
++ .model.controller = 'github-pr-9d9d2-lxd'
++ .model.cloud = 'localhost'
++ .model.version = '3.6.11'
++ .model.region = 'localhost'
++ .model.model_status.current = 'available'
++ .machines['0'].juju_status.current = 'started'
++ .machines['0'].juju_status.version = '3.6.11'
++ .machines['0'].hostname = 'juju-7eca0a-0'
++ .machines['0'].dns_name = '10.1.172.208'
++ .machines['0'].ip_addresses[0] = '10.1.172.208'
++ .machines['0'].instance_id = 'juju-7eca0a-0'
++ .machines['0'].machine_status.current = 'running'
++ .machines['0'].machine_status.message = 'Running'
++ .machines['0'].modification_status.current = 'applied'
++ .machines['0'].base.name = 'ubuntu'
++ .machines['0'].base.channel = '24.04'
++ .machines['0'].network_interfaces['eth0'].ip_addresses[0] = '10.1.172.208'
++ .machines['0'].network_interfaces['eth0'].mac_address = '00:16:3e:8c:dc:5a'
++ .machines['0'].network_interfaces['eth0'].is_up = True
++ .machines['0'].network_interfaces['eth0'].gateway = '10.1.172.1'
++ .machines['0'].network_interfaces['eth0'].space = 'alpha'
++ .machines['0'].constraints = 'arch=amd64'
++ .machines['0'].hardware = 'arch=amd64 cores=0 mem=0M availability-zone=github-runner virt-type=container'
++ .machines['1'].juju_status.current = 'pending'
++ .machines['1'].instance_id = 'pending'
++ .machines['1'].machine_status.current = 'pending'
++ .machines['1'].modification_status.current = 'idle'
++ .machines['1'].base.name = 'ubuntu'
++ .machines['1'].base.channel = '20.04'
++ .machines['1'].constraints = 'arch=amd64'
++ .apps['opendkim'].charm = 'local:opendkim-0'
++ .apps['opendkim'].charm_origin = 'local'
++ .apps['opendkim'].charm_name = 'opendkim'
++ .apps['opendkim'].charm_rev = 0
++ .apps['opendkim'].exposed = False
++ .apps['opendkim'].base.name = 'ubuntu'
++ .apps['opendkim'].base.channel = '24.04'
++ .apps['opendkim'].app_status.current = 'blocked'
++ .apps['opendkim'].app_status.message = 'empty signingtable configuration - empty keytable configuration - empty private-keys configuration'
++ .apps['opendkim'].relations['milter'][0].related_app = 'smtp-relay'
++ .apps['opendkim'].relations['milter'][0].interface = 'milter'
++ .apps['opendkim'].relations['milter'][0].scope = 'global'
++ .apps['opendkim'].units['opendkim/0'].workload_status.current = 'blocked'
++ .apps['opendkim'].units['opendkim/0'].workload_status.message = 'empty signingtable configuration - empty keytable configuration - empty private-keys configuration'
++ .apps['opendkim'].units['opendkim/0'].juju_status.current = 'executing'
++ .apps['opendkim'].units['opendkim/0'].juju_status.message = 'running milter-relation-created hook'
++ .apps['opendkim'].units['opendkim/0'].juju_status.version = '3.6.11'
++ .apps['opendkim'].units['opendkim/0'].leader = True
++ .apps['opendkim'].units['opendkim/0'].machine = '0'
++ .apps['opendkim'].units['opendkim/0'].open_ports[0] = '8892/tcp'
++ .apps['opendkim'].units['opendkim/0'].public_address = '10.1.172.208'
++ .apps['opendkim'].endpoint_bindings[''] = 'alpha'
++ .apps['opendkim'].endpoint_bindings['cos-agent'] = 'alpha'
++ .apps['opendkim'].endpoint_bindings['milter'] = 'alpha'
++ .apps['smtp-relay'].charm = 'smtp-relay'
++ .apps['smtp-relay'].charm_origin = 'charmhub'
++ .apps['smtp-relay'].charm_name = 'smtp-relay'
++ .apps['smtp-relay'].charm_rev = 37
++ .apps['smtp-relay'].exposed = False
++ .apps['smtp-relay'].base.name = 'ubuntu'
++ .apps['smtp-relay'].base.channel = '20.04'
++ .apps['smtp-relay'].charm_channel = 'latest/stable'
++ .apps['smtp-relay'].app_status.current = 'waiting'
++ .apps['smtp-relay'].app_status.message = 'waiting for machine'
++ .apps['smtp-relay'].relations['milter'][0].related_app = 'opendkim'
++ .apps['smtp-relay'].relations['milter'][0].interface = 'milter'
++ .apps['smtp-relay'].relations['milter'][0].scope = 'global'
++ .apps['smtp-relay'].relations['peer'][0].related_app = 'smtp-relay'
++ .apps['smtp-relay'].relations['peer'][0].interface = 'smtp-relay-peer'
++ .apps['smtp-relay'].relations['peer'][0].scope = 'global'
++ .apps['smtp-relay'].units['smtp-relay/0'].workload_status.current = 'waiting'
++ .apps['smtp-relay'].units['smtp-relay/0'].workload_status.message = 'waiting for machine'
++ .apps['smtp-relay'].units['smtp-relay/0'].juju_status.current = 'allocating'
++ .apps['smtp-relay'].units['smtp-relay/0'].machine = '1'
++ .apps['smtp-relay'].endpoint_bindings[''] = 'alpha'
++ .apps['smtp-relay'].endpoint_bindings['metrics'] = 'alpha'
++ .apps['smtp-relay'].endpoint_bindings['milter'] = 'alpha'
++ .apps['smtp-relay'].endpoint_bindings['nrpe-external-master'] = 'alpha'
++ .apps['smtp-relay'].endpoint_bindings['peer'] = 'alpha'
+13:13:40 [32mINFO[0m wait: status changed:
+- .machines['1'].machine_status.current = 'pending'
++ .machines['1'].machine_status.current = 'allocating'
++ .machines['1'].machine_status.message = 'acquiring LXD image'
+- .apps['opendkim'].units['opendkim/0'].juju_status.current = 'executing'
+- .apps['opendkim'].units['opendkim/0'].juju_status.message = 'running milter-relation-created hook'
++ .apps['opendkim'].units['opendkim/0'].juju_status.current = 'idle'
+13:13:42 [32mINFO[0m wait: status changed:
+- .machines['1'].machine_status.message = 'acquiring LXD image'
++ .machines['1'].machine_status.message = 'Retrieving image: metadata: 100% (3.17GB/s)'
++ .apps['smtp-relay'].charm_version = '87f4736'
+13:13:46 [32mINFO[0m wait: status changed:
+- .machines['1'].machine_status.message = 'Retrieving image: metadata: 100% (3.17GB/s)'
++ .machines['1'].machine_status.message = 'Retrieving image: rootfs: 1% (1.30MB/s)'
+13:13:47 [32mINFO[0m wait: status changed:
+- .machines['1'].machine_status.message = 'Retrieving image: rootfs: 1% (1.30MB/s)'
++ .machines['1'].machine_status.message = 'Retrieving image: rootfs: 2% (1.68MB/s)'
+13:13:48 [32mINFO[0m wait: status changed:
+- .machines['1'].machine_status.message = 'Retrieving image: rootfs: 2% (1.68MB/s)'
++ .machines['1'].machine_status.message = 'Retrieving image: rootfs: 3% (2.04MB/s)'
+13:13:50 [32mINFO[0m wait: status changed:
+- .machines['1'].machine_status.message = 'Retrieving image: rootfs: 3% (2.04MB/s)'
++ .machines['1'].machine_status.message = 'Retrieving image: rootfs: 4% (2.35MB/s)'
+13:13:51 [32mINFO[0m wait: status changed:
+- .machines['1'].machine_status.message = 'Retrieving image: rootfs: 4% (2.35MB/s)'
++ .machines['1'].machine_status.message = 'Retrieving image: rootfs: 5% (2.58MB/s)'
+13:13:52 [32mINFO[0m wait: status changed:
+- .machines['1'].machine_status.message = 'Retrieving image: rootfs: 5% (2.58MB/s)'
++ .machines['1'].machine_status.message = 'Retrieving image: rootfs: 7% (3.07MB/s)'
+13:13:53 [32mINFO[0m wait: status changed:
+- .machines['1'].machine_status.message = 'Retrieving image: rootfs: 7% (3.07MB/s)'
++ .machines['1'].machine_status.message = 'Retrieving image: rootfs: 9% (3.46MB/s)'
+13:13:54 [32mINFO[0m wait: status changed:
+- .machines['1'].machine_status.message = 'Retrieving image: rootfs: 9% (3.46MB/s)'
++ .machines['1'].machine_status.message = 'Retrieving image: rootfs: 10% (3.85MB/s)'
+13:13:56 [32mINFO[0m wait: status changed:
+- .machines['1'].machine_status.message = 'Retrieving image: rootfs: 10% (3.85MB/s)'
++ .machines['1'].machine_status.message = 'Retrieving image: rootfs: 12% (4.11MB/s)'
+13:13:57 [32mINFO[0m wait: status changed:
+- .machines['1'].machine_status.message = 'Retrieving image: rootfs: 12% (4.11MB/s)'
++ .machines['1'].machine_status.message = 'Retrieving image: rootfs: 16% (4.91MB/s)'
+13:13:58 [32mINFO[0m wait: status changed:
+- .machines['1'].machine_status.message = 'Retrieving image: rootfs: 16% (4.91MB/s)'
++ .machines['1'].machine_status.message = 'Retrieving image: rootfs: 20% (5.81MB/s)'
+13:13:59 [32mINFO[0m wait: status changed:
+- .machines['1'].machine_status.message = 'Retrieving image: rootfs: 20% (5.81MB/s)'
++ .machines['1'].machine_status.message = 'Retrieving image: rootfs: 24% (6.45MB/s)'
+13:14:00 [32mINFO[0m wait: status changed:
+- .machines['1'].machine_status.message = 'Retrieving image: rootfs: 24% (6.45MB/s)'
++ .machines['1'].machine_status.message = 'Retrieving image: rootfs: 28% (7.20MB/s)'
+13:14:01 [32mINFO[0m wait: status changed:
+- .machines['1'].machine_status.message = 'Retrieving image: rootfs: 28% (7.20MB/s)'
++ .machines['1'].machine_status.message = 'Retrieving image: rootfs: 33% (7.77MB/s)'
+13:14:03 [32mINFO[0m wait: status changed:
+- .machines['1'].machine_status.message = 'Retrieving image: rootfs: 33% (7.77MB/s)'
++ .machines['1'].machine_status.message = 'Retrieving image: rootfs: 37% (8.36MB/s)'
+13:14:04 [32mINFO[0m wait: status changed:
+- .machines['1'].machine_status.message = 'Retrieving image: rootfs: 37% (8.36MB/s)'
++ .machines['1'].machine_status.message = 'Retrieving image: rootfs: 42% (8.85MB/s)'
+13:14:05 [32mINFO[0m wait: status changed:
+- .machines['1'].machine_status.message = 'Retrieving image: rootfs: 42% (8.85MB/s)'
++ .machines['1'].machine_status.message = 'Retrieving image: rootfs: 47% (9.46MB/s)'
+13:14:06 [32mINFO[0m wait: status changed:
+- .machines['1'].machine_status.message = 'Retrieving image: rootfs: 47% (9.46MB/s)'
++ .machines['1'].machine_status.message = 'Retrieving image: rootfs: 54% (10.19MB/s)'
+13:14:07 [32mINFO[0m wait: status changed:
+- .machines['1'].machine_status.message = 'Retrieving image: rootfs: 54% (10.19MB/s)'
++ .machines['1'].machine_status.message = 'Retrieving image: rootfs: 59% (10.72MB/s)'
+13:14:08 [32mINFO[0m wait: status changed:
+- .machines['1'].machine_status.message = 'Retrieving image: rootfs: 59% (10.72MB/s)'
++ .machines['1'].machine_status.message = 'Retrieving image: rootfs: 66% (11.46MB/s)'
+13:14:10 [32mINFO[0m wait: status changed:
+- .machines['1'].machine_status.message = 'Retrieving image: rootfs: 66% (11.46MB/s)'
++ .machines['1'].machine_status.message = 'Retrieving image: rootfs: 74% (12.19MB/s)'
+13:14:11 [32mINFO[0m wait: status changed:
+- .machines['1'].machine_status.message = 'Retrieving image: rootfs: 74% (12.19MB/s)'
++ .machines['1'].machine_status.message = 'Retrieving image: rootfs: 79% (12.56MB/s)'
+13:14:12 [32mINFO[0m wait: status changed:
+- .machines['1'].machine_status.message = 'Retrieving image: rootfs: 79% (12.56MB/s)'
++ .machines['1'].machine_status.message = 'Retrieving image: rootfs: 84% (12.91MB/s)'
+13:14:13 [32mINFO[0m wait: status changed:
+- .machines['1'].machine_status.message = 'Retrieving image: rootfs: 84% (12.91MB/s)'
++ .machines['1'].machine_status.message = 'Retrieving image: rootfs: 90% (13.26MB/s)'
+13:14:14 [32mINFO[0m wait: status changed:
+- .machines['1'].machine_status.message = 'Retrieving image: rootfs: 90% (13.26MB/s)'
++ .machines['1'].machine_status.message = 'Retrieving image: rootfs: 95% (13.51MB/s)'
+13:14:15 [32mINFO[0m wait: status changed:
+- .machines['1'].machine_status.message = 'Retrieving image: rootfs: 95% (13.51MB/s)'
++ .machines['1'].machine_status.message = 'Creating container'
+13:14:20 [32mINFO[0m wait: status changed:
+- .machines['1'].instance_id = 'pending'
+- .machines['1'].machine_status.current = 'allocating'
+- .machines['1'].machine_status.message = 'Creating container'
+- .machines['1'].modification_status.current = 'idle'
++ .machines['1'].instance_id = 'juju-7eca0a-1'
++ .machines['1'].machine_status.current = 'running'
++ .machines['1'].machine_status.message = 'Container started'
++ .machines['1'].modification_status.current = 'applied'
++ .machines['1'].hardware = 'arch=amd64 cores=0 mem=0M availability-zone=github-runner virt-type=container'
+13:14:25 [32mINFO[0m wait: status changed:
++ .machines['1'].dns_name = '10.1.172.188'
++ .machines['1'].ip_addresses[0] = '10.1.172.188'
+- .machines['1'].machine_status.message = 'Container started'
++ .machines['1'].machine_status.message = 'Running'
++ .apps['smtp-relay'].units['smtp-relay/0'].public_address = '10.1.172.188'
+13:15:20 [32mINFO[0m wait: status changed:
+- .machines['1'].juju_status.current = 'pending'
++ .machines['1'].juju_status.current = 'started'
++ .machines['1'].juju_status.version = '3.6.11'
++ .machines['1'].hostname = 'juju-7eca0a-1'
++ .machines['1'].network_interfaces['eth0'].ip_addresses[0] = '10.1.172.188'
++ .machines['1'].network_interfaces['eth0'].mac_address = '00:16:3e:d0:49:8c'
++ .machines['1'].network_interfaces['eth0'].is_up = True
++ .machines['1'].network_interfaces['eth0'].gateway = '10.1.172.1'
++ .machines['1'].network_interfaces['eth0'].space = 'alpha'
+- .apps['smtp-relay'].app_status.current = 'waiting'
+- .apps['smtp-relay'].app_status.message = 'waiting for machine'
++ .apps['smtp-relay'].app_status.current = 'maintenance'
++ .apps['smtp-relay'].app_status.message = 'installing charm software'
+- .apps['smtp-relay'].units['smtp-relay/0'].workload_status.current = 'waiting'
+- .apps['smtp-relay'].units['smtp-relay/0'].workload_status.message = 'waiting for machine'
+- .apps['smtp-relay'].units['smtp-relay/0'].juju_status.current = 'allocating'
++ .apps['smtp-relay'].units['smtp-relay/0'].workload_status.current = 'maintenance'
++ .apps['smtp-relay'].units['smtp-relay/0'].workload_status.message = 'installing charm software'
++ .apps['smtp-relay'].units['smtp-relay/0'].juju_status.current = 'executing'
++ .apps['smtp-relay'].units['smtp-relay/0'].juju_status.message = 'running install hook'
++ .apps['smtp-relay'].units['smtp-relay/0'].juju_status.version = '3.6.11'
++ .apps['smtp-relay'].units['smtp-relay/0'].leader = True
+13:17:10 [32mINFO[0m wait: status changed:
+- .apps['smtp-relay'].app_status.message = 'installing charm software'
++ .apps['smtp-relay'].app_status.message = 'Setting up SMTP relay'
+- .apps['smtp-relay'].units['smtp-relay/0'].workload_status.message = 'installing charm software'
++ .apps['smtp-relay'].units['smtp-relay/0'].workload_status.message = 'Setting up SMTP relay'
+13:17:36 [32mINFO[0m wait: status changed:
+- .apps['smtp-relay'].app_status.current = 'maintenance'
+- .apps['smtp-relay'].app_status.message = 'Setting up SMTP relay'
++ .apps['smtp-relay'].app_status.current = 'active'
++ .apps['smtp-relay'].app_status.message = 'Ready (source version/commit 87f4736)'
+- .apps['smtp-relay'].units['smtp-relay/0'].workload_status.current = 'maintenance'
+- .apps['smtp-relay'].units['smtp-relay/0'].workload_status.message = 'Setting up SMTP relay'
++ .apps['smtp-relay'].units['smtp-relay/0'].workload_status.current = 'active'
++ .apps['smtp-relay'].units['smtp-relay/0'].workload_status.message = 'Ready (source version/commit 87f4736)'
+13:17:38 [32mINFO[0m wait: status changed:
+- .apps['opendkim'].units['opendkim/0'].juju_status.current = 'idle'
++ .apps['opendkim'].units['opendkim/0'].juju_status.current = 'executing'
++ .apps['opendkim'].units['opendkim/0'].juju_status.message = 'running milter-relation-changed hook for smtp-relay/0'
+- .apps['smtp-relay'].units['smtp-relay/0'].juju_status.message = 'running install hook'
++ .apps['smtp-relay'].units['smtp-relay/0'].juju_status.message = 'running milter-relation-created hook'
++ .apps['smtp-relay'].units['smtp-relay/0'].open_ports[0] = '25/tcp'
++ .apps['smtp-relay'].units['smtp-relay/0'].open_ports[1] = '465/tcp'
++ .apps['smtp-relay'].units['smtp-relay/0'].open_ports[2] = '587/tcp'
+13:17:39 [32mINFO[0m wait: status changed:
+- .apps['opendkim'].units['opendkim/0'].juju_status.current = 'executing'
+- .apps['opendkim'].units['opendkim/0'].juju_status.message = 'running milter-relation-changed hook for smtp-relay/0'
++ .apps['opendkim'].units['opendkim/0'].juju_status.current = 'idle'
+- .apps['smtp-relay'].units['smtp-relay/0'].juju_status.message = 'running milter-relation-created hook'
++ .apps['smtp-relay'].units['smtp-relay/0'].juju_status.message = 'running config-changed hook'
+13:17:39 [32mINFO[0m cli: juju status --model jubilant-7243151c --format json
+13:17:39 [32mINFO[0m cli: juju add-secret --model jubilant-7243151c opendkimsecret --file /home/ubuntu/snap/juju/common/tmp2xovopje
+13:17:39 [32mINFO[0m cli: juju grant-secret --model jubilant-7243151c secret:d3tnoss8vtbcqe15devg opendkim
+13:17:39 [32mINFO[0m cli: juju config --model jubilant-7243151c opendkim 'keytable=[["default._domainkey.testrelay.internal", "testrelay.internal:default:/etc/dkimkeys/testrelay-internal-default.private"]]' 'signingtable=[["*@testrelay.internal", "default._domainkey.testrelay.internal"]]' private-keys=secret:d3tnoss8vtbcqe15devg
+13:17:40 [32mINFO[0m cli: juju exec --model jubilant-7243151c --format json --machine 1 -- 'echo 10.151.33.241 testrelay.internal | sudo tee -a /etc/hosts'
+13:17:40 [32mINFO[0m cli: juju config --model jubilant-7243151c smtp-relay 'relay_domains=- testrelay.internal'
+13:17:40 [32mINFO[0m wait: status changed:
++ .model.name = 'jubilant-7243151c'
++ .model.type = 'iaas'
++ .model.controller = 'github-pr-9d9d2-lxd'
++ .model.cloud = 'localhost'
++ .model.version = '3.6.11'
++ .model.region = 'localhost'
++ .model.model_status.current = 'available'
++ .machines['0'].juju_status.current = 'started'
++ .machines['0'].juju_status.version = '3.6.11'
++ .machines['0'].hostname = 'juju-7eca0a-0'
++ .machines['0'].dns_name = '10.1.172.208'
++ .machines['0'].ip_addresses[0] = '10.1.172.208'
++ .machines['0'].instance_id = 'juju-7eca0a-0'
++ .machines['0'].machine_status.current = 'running'
++ .machines['0'].machine_status.message = 'Running'
++ .machines['0'].modification_status.current = 'applied'
++ .machines['0'].base.name = 'ubuntu'
++ .machines['0'].base.channel = '24.04'
++ .machines['0'].network_interfaces['eth0'].ip_addresses[0] = '10.1.172.208'
++ .machines['0'].network_interfaces['eth0'].mac_address = '00:16:3e:8c:dc:5a'
++ .machines['0'].network_interfaces['eth0'].is_up = True
++ .machines['0'].network_interfaces['eth0'].gateway = '10.1.172.1'
++ .machines['0'].network_interfaces['eth0'].space = 'alpha'
++ .machines['0'].constraints = 'arch=amd64'
++ .machines['0'].hardware = 'arch=amd64 cores=0 mem=0M availability-zone=github-runner virt-type=container'
++ .machines['1'].juju_status.current = 'started'
++ .machines['1'].juju_status.version = '3.6.11'
++ .machines['1'].hostname = 'juju-7eca0a-1'
++ .machines['1'].dns_name = '10.1.172.188'
++ .machines['1'].ip_addresses[0] = '10.1.172.188'
++ .machines['1'].instance_id = 'juju-7eca0a-1'
++ .machines['1'].machine_status.current = 'running'
++ .machines['1'].machine_status.message = 'Running'
++ .machines['1'].modification_status.current = 'applied'
++ .machines['1'].base.name = 'ubuntu'
++ .machines['1'].base.channel = '20.04'
++ .machines['1'].network_interfaces['eth0'].ip_addresses[0] = '10.1.172.188'
++ .machines['1'].network_interfaces['eth0'].mac_address = '00:16:3e:d0:49:8c'
++ .machines['1'].network_interfaces['eth0'].is_up = True
++ .machines['1'].network_interfaces['eth0'].gateway = '10.1.172.1'
++ .machines['1'].network_interfaces['eth0'].space = 'alpha'
++ .machines['1'].constraints = 'arch=amd64'
++ .machines['1'].hardware = 'arch=amd64 cores=0 mem=0M availability-zone=github-runner virt-type=container'
++ .apps['opendkim'].charm = 'local:opendkim-0'
++ .apps['opendkim'].charm_origin = 'local'
++ .apps['opendkim'].charm_name = 'opendkim'
++ .apps['opendkim'].charm_rev = 0
++ .apps['opendkim'].exposed = False
++ .apps['opendkim'].base.name = 'ubuntu'
++ .apps['opendkim'].base.channel = '24.04'
++ .apps['opendkim'].app_status.current = 'blocked'
++ .apps['opendkim'].app_status.message = 'empty signingtable configuration - empty keytable configuration - empty private-keys configuration'
++ .apps['opendkim'].relations['milter'][0].related_app = 'smtp-relay'
++ .apps['opendkim'].relations['milter'][0].interface = 'milter'
++ .apps['opendkim'].relations['milter'][0].scope = 'global'
++ .apps['opendkim'].units['opendkim/0'].workload_status.current = 'blocked'
++ .apps['opendkim'].units['opendkim/0'].workload_status.message = 'empty signingtable configuration - empty keytable configuration - empty private-keys configuration'
++ .apps['opendkim'].units['opendkim/0'].juju_status.current = 'executing'
++ .apps['opendkim'].units['opendkim/0'].juju_status.message = 'running config-changed hook'
++ .apps['opendkim'].units['opendkim/0'].juju_status.version = '3.6.11'
++ .apps['opendkim'].units['opendkim/0'].leader = True
++ .apps['opendkim'].units['opendkim/0'].machine = '0'
++ .apps['opendkim'].units['opendkim/0'].open_ports[0] = '8892/tcp'
++ .apps['opendkim'].units['opendkim/0'].public_address = '10.1.172.208'
++ .apps['opendkim'].endpoint_bindings[''] = 'alpha'
++ .apps['opendkim'].endpoint_bindings['cos-agent'] = 'alpha'
++ .apps['opendkim'].endpoint_bindings['milter'] = 'alpha'
++ .apps['smtp-relay'].charm = 'smtp-relay'
++ .apps['smtp-relay'].charm_origin = 'charmhub'
++ .apps['smtp-relay'].charm_name = 'smtp-relay'
++ .apps['smtp-relay'].charm_rev = 37
++ .apps['smtp-relay'].exposed = False
++ .apps['smtp-relay'].base.name = 'ubuntu'
++ .apps['smtp-relay'].base.channel = '20.04'
++ .apps['smtp-relay'].charm_channel = 'latest/stable'
++ .apps['smtp-relay'].charm_version = '87f4736'
++ .apps['smtp-relay'].app_status.current = 'maintenance'
++ .apps['smtp-relay'].app_status.message = 'Reloading postfix due to config changes'
++ .apps['smtp-relay'].relations['milter'][0].related_app = 'opendkim'
++ .apps['smtp-relay'].relations['milter'][0].interface = 'milter'
++ .apps['smtp-relay'].relations['milter'][0].scope = 'global'
++ .apps['smtp-relay'].relations['peer'][0].related_app = 'smtp-relay'
++ .apps['smtp-relay'].relations['peer'][0].interface = 'smtp-relay-peer'
++ .apps['smtp-relay'].relations['peer'][0].scope = 'global'
++ .apps['smtp-relay'].units['smtp-relay/0'].workload_status.current = 'maintenance'
++ .apps['smtp-relay'].units['smtp-relay/0'].workload_status.message = 'Reloading postfix due to config changes'
++ .apps['smtp-relay'].units['smtp-relay/0'].juju_status.current = 'executing'
++ .apps['smtp-relay'].units['smtp-relay/0'].juju_status.message = 'running milter-relation-joined hook for opendkim/0'
++ .apps['smtp-relay'].units['smtp-relay/0'].juju_status.version = '3.6.11'
++ .apps['smtp-relay'].units['smtp-relay/0'].leader = True
++ .apps['smtp-relay'].units['smtp-relay/0'].machine = '1'
++ .apps['smtp-relay'].units['smtp-relay/0'].open_ports[0] = '25/tcp'
++ .apps['smtp-relay'].units['smtp-relay/0'].open_ports[1] = '465/tcp'
++ .apps['smtp-relay'].units['smtp-relay/0'].open_ports[2] = '587/tcp'
++ .apps['smtp-relay'].units['smtp-relay/0'].public_address = '10.1.172.188'
++ .apps['smtp-relay'].endpoint_bindings[''] = 'alpha'
++ .apps['smtp-relay'].endpoint_bindings['metrics'] = 'alpha'
++ .apps['smtp-relay'].endpoint_bindings['milter'] = 'alpha'
++ .apps['smtp-relay'].endpoint_bindings['nrpe-external-master'] = 'alpha'
++ .apps['smtp-relay'].endpoint_bindings['peer'] = 'alpha'
+13:17:45 [32mINFO[0m wait: status changed:
+- .apps['smtp-relay'].app_status.current = 'maintenance'
+- .apps['smtp-relay'].app_status.message = 'Reloading postfix due to config changes'
++ .apps['smtp-relay'].app_status.current = 'active'
++ .apps['smtp-relay'].app_status.message = 'Ready (source version/commit 87f4736)'
+- .apps['smtp-relay'].units['smtp-relay/0'].workload_status.current = 'maintenance'
+- .apps['smtp-relay'].units['smtp-relay/0'].workload_status.message = 'Reloading postfix due to config changes'
++ .apps['smtp-relay'].units['smtp-relay/0'].workload_status.current = 'active'
++ .apps['smtp-relay'].units['smtp-relay/0'].workload_status.message = 'Ready (source version/commit 87f4736)'
+- .apps['smtp-relay'].units['smtp-relay/0'].juju_status.message = 'running milter-relation-joined hook for opendkim/0'
++ .apps['smtp-relay'].units['smtp-relay/0'].juju_status.message = 'running milter-relation-changed hook for opendkim/0'
+13:17:51 [32mINFO[0m wait: status changed:
+- .apps['smtp-relay'].units['smtp-relay/0'].juju_status.current = 'executing'
+- .apps['smtp-relay'].units['smtp-relay/0'].juju_status.message = 'running milter-relation-changed hook for opendkim/0'
++ .apps['smtp-relay'].units['smtp-relay/0'].juju_status.current = 'idle'
+13:17:56 [32mINFO[0m wait: status changed:
+- .apps['opendkim'].app_status.current = 'blocked'
+- .apps['opendkim'].app_status.message = 'empty signingtable configuration - empty keytable configuration - empty private-keys configuration'
++ .apps['opendkim'].app_status.current = 'active'
+- .apps['opendkim'].units['opendkim/0'].workload_status.current = 'blocked'
+- .apps['opendkim'].units['opendkim/0'].workload_status.message = 'empty signingtable configuration - empty keytable configuration - empty private-keys configuration'
+- .apps['opendkim'].units['opendkim/0'].juju_status.current = 'executing'
+- .apps['opendkim'].units['opendkim/0'].juju_status.message = 'running config-changed hook'
++ .apps['opendkim'].units['opendkim/0'].workload_status.current = 'active'
++ .apps['opendkim'].units['opendkim/0'].juju_status.current = 'idle'
+13:18:07 [32mINFO[0m Message in mailcatcher: DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=testrelay.internal;
+	s=default; t=1761311886;
+	bh=1FKKzdomBOqVn7idX5eqSyukm372Nw4+0sdkpTQjMy4=; h=Subject:To:From;
+	b=EeSD+WDHAK0OqgmsUwG5hzNnh0pT+bHppHFjyaLS0hg/lGqGceXZGS4xgEVwN/QTf
+	 2W+XtRz6FyzCRMPTIxdtP9V6WwmiU9z8BEfzaHqbGR1D/YVfXRDeNAn8lG2e13QPYr
+	 7JE9ASr6vJtbWBPCM44aMGILd3fXgYfAiKDQkRM8XJM+mnEMcjIugd0CCc2n4ZJVmT
+	 024z0Fv0T6LX+edYmM7VxN0tXwIqAwWLvQgCrkZtLtEjlepTs7F0LYr6a7IdWS9WpI
+	 uIgTqEa/VX9+bpfllwY7bLt9iu0pG2+FZL+AChVuMs5kD/Dg1te2NrijvYe6DxZTxS
+	 oXj2nFmzU+aMQ==
+Received: from [10.151.33.241] (_gateway.lxd [10.1.172.1])
+	by juju-7eca0a-1.lxd (Postfix) with ESMTP id AF3831CBCA8
+	for <otherone@testrelay.internal>; Fri, 24 Oct 2025 13:18:06 +0000 (UTC)
+Subject: Hi Mailtrap
+To: Some One <someone@testrelay.internal>
+From: otherone@testrelay.internal
+
+This is my first message with Python.
