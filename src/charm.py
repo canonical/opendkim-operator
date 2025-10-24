@@ -11,7 +11,8 @@ import typing
 from pathlib import Path
 
 import ops
-from charmlibs import apt
+from charmlibs import apt, snap
+from charms.grafana_agent.v0.cos_agent import COSAgentProvider
 from charms.operator_libs_linux.v1 import systemd
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
@@ -32,6 +33,11 @@ LOG_RETENTION_DAYS = 120
 
 MILTER_RELATION_NAME = "milter"
 
+COS_DIRPATH = Path("cos")
+
+TELEGRAF_CONF_SRC = COS_DIRPATH / "telegraf/telegraf.conf"
+TELEGRAF_CONF_DST = Path("/var/snap/telegraf/current/telegraf.conf")
+
 
 class OpenDKIMCharm(ops.CharmBase):
     """Charm the service."""
@@ -51,15 +57,38 @@ class OpenDKIMCharm(ops.CharmBase):
         self.framework.observe(self.on[MILTER_RELATION_NAME].relation_departed, self._reconcile)
         self.unit.open_port("tcp", OPENDKIM_MILTER_PORT)
 
+        self._grafana_agent = COSAgentProvider(
+            self,
+            metrics_endpoints=[
+                {"path": "/metrics", "port": 9103},
+            ],
+            dashboard_dirs=[COS_DIRPATH / "grafana_dashboards"],
+            metrics_rules_dir=COS_DIRPATH / "prometheus_alert_rules",
+            logs_rules_dir=COS_DIRPATH / "loki_alert_rules",
+        )
+
     def _install(self, _: ops.EventBase) -> None:
-        """Install opendkim package."""
+        """Install opendkim package and telegraf snap."""
         self.unit.status = ops.MaintenanceStatus("installing opendkim")
         apt.add_package(package_names=OPENDKIM_PACKAGE_NAME, update_cache=True)
+
+        self._install_telegraf()
+
         rotate_content = utils.update_logrotate_conf(
             str(LOG_ROTATE_SYSLOG), frequency="daily", retention=LOG_RETENTION_DAYS
         )
         utils.write_file(LOG_ROTATE_SYSLOG, rotate_content, 0o644, user="root")
         self.unit.status = ops.WaitingStatus()
+
+    def _install_telegraf(self) -> None:
+        """Install telegraf."""
+        try:
+            telegraf_snap = typing.cast(snap.Snap, snap.add(["telegraf"]))
+            TELEGRAF_CONF_DST.touch()
+            utils.write_file(TELEGRAF_CONF_DST, TELEGRAF_CONF_SRC.read_text(), 0o644, user="root")
+            telegraf_snap.restart()
+        except snap.SnapError:
+            logger.exception("An exception occurred when installing Telegraf snap")
 
     def _reconcile(self, _: ops.EventBase) -> None:
         """Configure the workload with the provided configuration for the charm."""

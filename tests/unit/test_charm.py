@@ -10,17 +10,17 @@ import tempfile
 import typing
 from pathlib import Path
 from secrets import token_hex
-from unittest.mock import ANY, MagicMock
+from unittest.mock import ANY, MagicMock, call
 
-import ops
 import ops.testing
 import pytest
 
+import charm
 import utils
 from charm import OpenDKIMCharm
 
 
-def test_install(monkeypatch):
+def test_install(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     """
     arrange: Mock apt.add_package and prepare a trivial context and state.
     act: Run install hook.
@@ -28,6 +28,12 @@ def test_install(monkeypatch):
     """
     add_package_mock = MagicMock()
     monkeypatch.setattr("charm.apt.add_package", add_package_mock)
+
+    telegraf_snap_mock = MagicMock()
+    snap_add_mock = MagicMock(return_value=telegraf_snap_mock)
+    monkeypatch.setattr(charm.snap, "add", snap_add_mock)
+    telegraf_conf = tmp_path / "telegraf.conf"
+    monkeypatch.setattr(charm, "TELEGRAF_CONF_DST", telegraf_conf)
 
     write_file_mock = MagicMock()
     monkeypatch.setattr("utils.write_file", write_file_mock)
@@ -44,6 +50,11 @@ def test_install(monkeypatch):
     assert len(out.opened_ports) == 1
     assert list(out.opened_ports)[0].port == 8892
     assert out.unit_status.name == ops.testing.WaitingStatus.name
+
+    # Telegraf configuration
+    snap_add_mock.assert_called_once_with(["telegraf"])
+    write_file_mock.assert_has_calls([call(telegraf_conf, ANY, 0o644, user="root")])
+    telegraf_snap_mock.restart.assert_called_once()
 
 
 @pytest.mark.parametrize(

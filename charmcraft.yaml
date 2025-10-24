@@ -14,7 +14,7 @@ links:
 description: |
   A [Juju](https://juju.is/) [charm](https://juju.is/docs/olm/charmed-operators)
   deploying and managing [OpenDKIM](http://www.opendkim.org/) on machines.
-  
+
   OpenDKIM is a community effort to develop and maintain a C library for
   producing DKIM-aware applications and an open source milter for providing DKIM service.
 
@@ -30,13 +30,18 @@ parts:
 provides:
   milter:
     interface: milter
+  cos-agent:
+    interface: cos_agent
+    limit: 1
 
 assumes:
   - juju >= 3.6
 
 charm-libs:
-- lib: operator_libs_linux.systemd
-  version: '1'
+  - lib: operator_libs_linux.systemd
+    version: "1"
+  - lib: grafana_agent.cos_agent
+    version: "0"
 
 config:
   options:
@@ -70,7 +75,7 @@ config:
          without the '.private' extension, and the value the private key.
     mode:
       type: string
-      default: 'sv'
+      default: "sv"
       description: |
         Selects operating modes. The string is a concatenation of
         characters that indicate which mode(s) of operation are
