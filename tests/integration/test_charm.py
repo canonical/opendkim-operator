@@ -7,7 +7,6 @@
 
 # pylint: disable=too-many-arguments,too-many-locals
 
-
 import json
 import logging
 import pathlib
