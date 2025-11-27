@@ -48,7 +48,7 @@ def test_install(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     out = context.run(context.on.install(), state)
     write_file_mock.assert_called_with(Path("/etc/logrotate.d/rsyslog"), ANY, 0o644, user="root")
     assert len(out.opened_ports) == 1
-    assert list(out.opened_ports)[0].port == 8892
+    assert next(iter(out.opened_ports)).port == 8892
     assert out.unit_status.name == ops.testing.WaitingStatus.name
 
     # Telegraf configuration
@@ -199,7 +199,7 @@ def test_correct_config(initial_opendkin_conf, restart_expected, base_state, mon
     out = context.run(context.on.config_changed(), state)
 
     assert out.unit_status.name == ops.testing.ActiveStatus.name
-    assert list(out.relations)[0].local_unit_data["port"] == "8892"
+    assert next(iter(out.relations)).local_unit_data["port"] == "8892"
 
     systemd_reload_mock.assert_called_with("opendkim")
     if restart_expected:
