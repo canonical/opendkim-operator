@@ -69,7 +69,7 @@ def test_opendkim_signed_message(
     assert: The email is correctly relayed to the mailcatcher local test smtp server.
     """
     status = juju.status()
-    unit = list(status.apps[smtp_relay_app].units.values())[0]
+    unit = next(iter(status.apps[smtp_relay_app].units.values()))
     unit_ip = unit.public_address
 
     domain = "testrelay.internal"
@@ -198,7 +198,7 @@ def test_metrics_configured(juju: jubilant.Juju, opendkim_app, smtp_relay_app, m
     assert: The metrics can be scraped and there are metrics.
     """
     status = juju.status()
-    unit = list(status.apps[opendkim_app].units.values())[0]
+    unit = next(iter(status.apps[opendkim_app].units.values()))
     unit_ip = unit.public_address
 
     domain = "testrelay.internal"
