@@ -26,7 +26,7 @@ def update_logrotate_conf(
     if not os.path.exists(path):
         return ""
 
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         config = f.read().split("\n")
 
     new = []

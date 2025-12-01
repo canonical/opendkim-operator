@@ -24,9 +24,15 @@ platforms:
 
 parts:
   charm:
-    plugin: charm
     source: .
-
+    plugin: uv
+    build-snaps:
+    - astral-uv
+  dump:
+    plugin: templates
+    source: .
+    stage:
+    - templates
 provides:
   milter:
     interface: milter
