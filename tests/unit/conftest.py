@@ -8,6 +8,7 @@ import typing
 from secrets import token_hex
 
 import ops
+import ops.testing
 import pytest
 
 
