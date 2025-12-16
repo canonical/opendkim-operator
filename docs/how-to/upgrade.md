@@ -6,7 +6,7 @@ Upgrade the `opendkim-operator` charm with the `refresh` command:
 juju refresh opendkim-operator
 ```
 
-Check that the ingress-configurator charm is active and running:
+Check that the `opendkim-operator` charm is active and running:
 
 ```bash
 juju status
