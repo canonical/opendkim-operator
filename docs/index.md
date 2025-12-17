@@ -53,7 +53,7 @@ Thinking about using the OpenDKIM Operator for your next project?
   1. [Integrations](reference/integrations.md)
   1. [Metrics](reference/metrics.md)
 1. [Explanation]()
-  1. [Charm architecture](explanation/charm-architecture.md)
+  1. [Charm architecture](reference/charm-architecture.md)
   1. [Security](explanation/security.md)
 1. [Release notes]()
   1. [Overview](release-notes/landing-page.md)
