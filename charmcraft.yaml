@@ -29,7 +29,7 @@ parts:
     build-snaps:
     - astral-uv
   dump:
-    plugin: templates
+    plugin: dump
     source: .
     stage:
     - templates
