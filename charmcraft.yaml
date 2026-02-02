@@ -33,6 +33,7 @@ parts:
     source: .
     stage:
     - templates
+    - cos
 provides:
   milter:
     interface: milter
