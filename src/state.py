@@ -3,7 +3,6 @@
 
 """OpenDKIM state."""
 
-
 import logging
 import typing
 from pathlib import Path
