@@ -1,6 +1,6 @@
 # Contributing
 
-This document explains the processes and practices recommended for contributing enhancements to the OpenDKIM charm.
+This document explains the processes and practices recommended for contributing enhancements to the Charmed OpenDKIM charm.
 
 ## Overview
 
@@ -28,8 +28,8 @@ When contributing, you must abide by the
 ## Changelog
 
 Please ensure that any new feature, fix, or significant change is documented by
-adding an entry to the [CHANGELOG.md](https://github.com/canonical/opendkim-operator/blob/main/docs/changelog.md) file.
-Use the date of the contribution as the header for new entries.
+adding an entry to the [CHANGELOG.md](./docs/changelog.md) file. Use the date of the
+contribution as the header for new entries.
 
 To learn more about changelog best practices, visit [Keep a Changelog](https://keepachangelog.com/).
 
@@ -88,7 +88,7 @@ we use the [Canonical contributor license agreement](https://assets.ubuntu.com/v
 
 #### Canonical contributor agreement
 
-Canonical welcomes contributions to the OpenDKIM charm. Please check out our
+Canonical welcomes contributions to the Charmed OpenDKIM charm. Please check out our
 [contributor agreement](https://ubuntu.com/legal/contributors) if you're interested in contributing to the solution.
 
 The CLA sign-off is simple line at the
@@ -112,14 +112,27 @@ The code for this charm can be downloaded as follows:
 git clone https://github.com/canonical/opendkim-operator
 ```
 
-You can create an environment for development with `python3-venv`.
-We will also install `tox` inside the virtual environment for testing:
+Make sure to install [`uv`](https://docs.astral.sh/uv/). For example, you can install `uv` on Ubuntu using:
 
 ```bash
-sudo apt install python3-venv
-python3 -m venv venv
-source venv/bin/activate
-pip install tox
+sudo snap install astral-uv --classic
+```
+
+For other systems, follow the [`uv` installation guide](https://docs.astral.sh/uv/getting-started/installation/).
+
+Then install `tox` with its extensions, and install a range of Python versions:
+
+```bash
+uv python install
+uv tool install tox --with tox-uv
+uv tool update-shell
+```
+
+To create a development environment, run:
+
+```bash
+uv sync --all-groups
+source .venv/bin/activate
 ```
 
 ### Test
@@ -128,7 +141,7 @@ This project uses `tox` for managing test environments. There are some pre-confi
 that can be used for linting and formatting code when you're preparing contributions to the charm:
 
 * ``tox``: Executes all of the basic checks and tests (``lint``, ``unit``, ``static``, and ``coverage-report``).
-* ``tox -e fmt``: Runs formatting using ``black`` and ``isort``.
+* ``tox -e fmt``: Runs formatting using ``ruff``.
 * ``tox -e lint``: Runs a range of static code analysis to check the code.
 * ``tox -e static``: Runs other checks such as ``bandit`` for security issues.
 * ``tox -e unit``: Runs the unit tests.
@@ -150,7 +163,5 @@ juju add-model charm-dev
 # Enable DEBUG logging
 juju model-config logging-config="<root>=INFO;unit=DEBUG"
 # Deploy the charm
-juju deploy ./opendkim_amd64.charm
+juju deploy ./opendkim*.charm
 ```
-
-
