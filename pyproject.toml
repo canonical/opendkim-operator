@@ -28,7 +28,7 @@ fmt = [
 ]
 lint = [
   "codespell",
-  "jubilant==1.4",
+  "jubilant==1.7.0",
   "mypy",
   "pep8-naming",
   "pytest",
