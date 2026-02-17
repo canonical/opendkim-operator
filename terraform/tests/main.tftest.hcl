@@ -8,8 +8,12 @@ variables {
 }
 
 run "basic_deploy" {
+  module {
+    source = "./tests"
+  }
+
   assert {
-    condition     = module.charm_name.app_name == "opendkim"
-    error_message = "charm_name app_name did not match expected"
+    condition     = module.opendkim.app_name == "opendkim"
+    error_message = "opendkim app_name did not match expected"
   }
 }

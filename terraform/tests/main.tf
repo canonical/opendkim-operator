@@ -16,7 +16,7 @@ variable "revision" {
 terraform {
   required_providers {
     juju = {
-      version = "~> 0.23.0"
+      version = "> 1.1.0"
       source  = "juju/juju"
     }
   }
@@ -24,10 +24,14 @@ terraform {
 
 provider "juju" {}
 
+resource "juju_model" "test_model" {
+  name = "test-model"
+}
+
 module "opendkim" {
-  source   = "./.."
-  app_name = "opendkim"
-  channel  = var.channel
-  model    = "prod-opendkim-example"
-  revision = var.revision
+  source     = "./.."
+  app_name   = "opendkim"
+  channel    = var.channel
+  model_uuid = juju_model.test_model.uuid
+  revision   = var.revision
 }
