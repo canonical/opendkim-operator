@@ -25,7 +25,7 @@ terraform {
 provider "juju" {}
 
 resource "juju_model" "test_model" {
-  name = "test-model"
+  name = "test-opendkim-${formatdate("YYYYMMDDhhmmss", timestamp())}"
 }
 
 module "opendkim" {
