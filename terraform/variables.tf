@@ -32,8 +32,15 @@ variable "constraints" {
 }
 
 variable "model" {
-  description = "Reference to a `juju_model`."
+  description = "Reference to a `juju_model`. Use either model or model_uuid"
   type        = string
+  default     = null
+}
+
+variable "model_uuid" {
+  description = "UUID of the model to deploy the charm to. Use either model or model_uuid"
+  type        = string
+  default     = null
 }
 
 variable "revision" {
