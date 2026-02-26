@@ -13,7 +13,6 @@ from pathlib import Path
 import ops
 from charmlibs import apt, snap, systemd
 from charms.grafana_agent.v0.cos_agent import COSAgentProvider
-from charms.operator_libs_linux.v1 import systemd
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 import utils
