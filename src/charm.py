@@ -152,7 +152,7 @@ def validate_opendkim() -> None:
     """
     try:
         subprocess.run(  # nosec
-            ["opendkim-testkey", "-x", OPENDKIM_CONFIG_PATH, "-vv"], timeout=100, check=True
+            ["/usr/sbin/opendkim-testkey", "-x", OPENDKIM_CONFIG_PATH, "-vv"], timeout=100, check=True
         )
     except (subprocess.CalledProcessError, TimeoutError) as exc:
         logger.exception("Error validating with opendkim-testkey")
