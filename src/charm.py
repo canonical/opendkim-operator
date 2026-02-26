@@ -11,9 +11,8 @@ import typing
 from pathlib import Path
 
 import ops
-from charmlibs import apt, snap
+from charmlibs import apt, snap, systemd
 from charms.grafana_agent.v0.cos_agent import COSAgentProvider
-from charms.operator_libs_linux.v1 import systemd
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 import utils
@@ -153,7 +152,7 @@ def validate_opendkim() -> None:
     """
     try:
         subprocess.run(  # nosec
-            ["opendkim-testkey", "-x", OPENDKIM_CONFIG_PATH, "-vv"],  # noqa: S607
+            ["/usr/sbin/opendkim-testkey", "-x", OPENDKIM_CONFIG_PATH, "-vv"],
             timeout=100,
             check=True,
         )
