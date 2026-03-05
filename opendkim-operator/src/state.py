@@ -14,7 +14,7 @@ from pydantic import BaseModel, ValidationError, computed_field
 logger = logging.getLogger(__name__)
 
 OPENDKIM_MILTER_PORT = 8892
-OPENDKIM_KEYS_PATH = Path("/etc/dkimkeys")
+OPENDKIM_KEYS_PATH = Path("/var/snap/opendkim/current/etc/dkimkeys")
 OPENDKIM_SIGNINGTABLE_PATH = OPENDKIM_KEYS_PATH / "signingtable"
 OPENDKIM_KEYTABLE_PATH = OPENDKIM_KEYS_PATH / "keytable"
 

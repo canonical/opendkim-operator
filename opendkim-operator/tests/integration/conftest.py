@@ -3,11 +3,18 @@
 
 """Fixtures for charm integration tests."""
 
+import glob
+import logging
+import pathlib
 import typing
 from collections.abc import Generator
 
 import jubilant
 import pytest
+
+logger = logging.getLogger(__name__)
+
+OPENDKIM_SNAP_DIR = pathlib.Path(__file__).resolve().parents[2] / ".." / "opendkim-snap"
 
 
 @pytest.fixture(scope="module", name="opendkim_charm")
@@ -25,7 +32,7 @@ def deploy_opendkim_fixture(
     opendkim_charm: str,
     juju: jubilant.Juju,
 ) -> str:
-    """Deploy opendkim."""
+    """Deploy opendkim and replace the store snap with the locally-built one."""
     deploy_opendkim_name = "opendkim"
 
     if not juju.status().apps.get(deploy_opendkim_name):
@@ -33,12 +40,60 @@ def deploy_opendkim_fixture(
             f"./{opendkim_charm}",
             deploy_opendkim_name,
         )
-        # It is blocked because it is not configured here.
+        # Wait for the charm to settle (blocked because not configured, or waiting).
         juju.wait(
-            lambda status: status.apps[deploy_opendkim_name].is_blocked,
+            lambda status: (
+                status.apps[deploy_opendkim_name].is_blocked
+                or status.apps[deploy_opendkim_name].app_status.current == "waiting"
+            ),
             timeout=10 * 60,
         )
+
+    _replace_snap_on_unit(juju, deploy_opendkim_name)
+
     return deploy_opendkim_name
+
+
+def _replace_snap_on_unit(juju: jubilant.Juju, app_name: str) -> None:
+    """Replace the store-installed opendkim snap with the locally-built one.
+
+    Finds the snap artifact built by setup-integration-tests.sh, copies it
+    to each unit's machine, and installs it with --dangerous --devmode.
+
+    Args:
+        juju: The Juju client.
+        app_name: The application name.
+    """
+    snap_files = sorted(glob.glob(str(OPENDKIM_SNAP_DIR / "opendkim_*.snap")))
+    if not snap_files:
+        logger.warning(
+            "No locally-built opendkim snap found in %s; skipping replacement", OPENDKIM_SNAP_DIR
+        )
+        return
+
+    snap_path = snap_files[-1]
+    snap_name = pathlib.Path(snap_path).name
+    logger.info("Replacing opendkim snap on units with %s", snap_path)
+
+    status = juju.status()
+    for unit_name, unit in status.apps[app_name].units.items():
+        machine = unit.machine
+        # Copy snap to the machine
+        juju.cli("scp", snap_path, f"{unit_name}:/tmp/{snap_name}")
+        # Install with --dangerous --devmode, replacing the store version
+        juju.cli(
+            "exec",
+            "--unit",
+            unit_name,
+            "--",
+            "sudo",
+            "snap",
+            "install",
+            "--dangerous",
+            "--devmode",
+            f"/tmp/{snap_name}",
+        )
+        logger.info("Replaced opendkim snap on unit %s (machine %s)", unit_name, machine)
 
 
 @pytest.fixture(scope="module", name="smtp_relay_app")
@@ -53,8 +108,10 @@ def deploy_smtp_relay_fixture(
         juju.deploy(smtp_relay_app_name, smtp_relay_app_name)
         juju.integrate(smtp_relay_app_name, opendkim_app)
         juju.wait(
-            lambda status: jubilant.all_active(status, smtp_relay_app_name)
-            and jubilant.all_blocked(status, opendkim_app),
+            lambda status: (
+                jubilant.all_active(status, smtp_relay_app_name)
+                and jubilant.all_blocked(status, opendkim_app)
+            ),
             timeout=10 * 60,
         )
     return smtp_relay_app_name

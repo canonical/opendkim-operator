@@ -47,6 +47,8 @@ Thinking about using the OpenDKIM Operator for your next project?
   1. [Integrate with COS](how-to/integrate-with-cos.md)
   1. [Contribute](how-to/contribute.md)
   1. [Upgrade](how-to/upgrade.md)
+  1. [Build the OpenDKIM snap](how-to/build-opendkim-snap.md)
+  1. [Manually test DKIM signing](how-to/manual-test-signed-message.md)
 1. [Reference]()
   1. [Actions](reference/actions.md)
   1. [Charm architecture](reference/charm-architecture.md)
