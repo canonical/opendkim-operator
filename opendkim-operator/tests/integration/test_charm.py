@@ -36,7 +36,9 @@ def generate_opendkim_genkey(domain: str, selector: str) -> typing.Tuple[str, st
     """
     with tempfile.TemporaryDirectory() as tmpdirname:
         subprocess.run(  # nosec
-            ["opendkim-genkey", "-s", selector, "-d", domain], check=True, cwd=tmpdirname
+            ["opendkim-genkey", "-s", selector, "-d", domain, "-D", tmpdirname],
+            check=True,
+            cwd=tmpdirname,
         )
         # Two files should have been created, {selector}.txt and {selector}.private
         txt_data = (pathlib.Path(tmpdirname) / pathlib.Path(f"{selector}.txt")).read_text()
@@ -181,8 +183,9 @@ def test_opendkim_testkey_failed_validation_(juju: jubilant.Juju, opendkim_app, 
 
     juju.config(smtp_relay_app, {"relay_domains": f"- {domain}"})
     juju.wait(
-        lambda status: status.apps[smtp_relay_app].is_active
-        and status.apps[opendkim_app].is_blocked,
+        lambda status: (
+            status.apps[smtp_relay_app].is_active and status.apps[opendkim_app].is_blocked
+        ),
         timeout=3 * 60,
         delay=5,
     )
