@@ -12,6 +12,15 @@ __pycache__/
 */*.rock
 terraform/tests/.terraform
 
+# Snap build artifacts
+*.snap
+opendkim-snap/snap/parts/
+opendkim-snap/snap/prime/
+opendkim-snap/snap/stage/
+opendkim-snap/snap/.craft/
+opendkim-snap/snap/overlay/
+opendkim-snap/snap/*.bak
+
 # BEGIN VALE WORKFLOW IGNORE
 .vale/styles/*
 !.vale/styles/local
