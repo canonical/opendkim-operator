@@ -7,6 +7,7 @@ path: /root/spread/opendkim-snap
 
 environment:
   PROJECT_PATH: /root/spread/opendkim-snap
+  CRAFT_ARTIFACT: '$(HOST: echo "$CRAFT_ARTIFACT")'
 
 backends:
   ci:
@@ -16,7 +17,7 @@ backends:
           username: root
           password: $SPREAD_PASSWORD
     allocate: ADDRESS $(spread/.extension allocate ci)
-    discard: "$PROJECT_PATH/spread/.extension discard ci"
+    discard: ./spread/.extension discard ci
     prepare: "$PROJECT_PATH/spread/.extension backend-prepare"
     restore: "$PROJECT_PATH/spread/.extension backend-restore"
     prepare-each: "$PROJECT_PATH/spread/.extension backend-prepare-each"
@@ -28,11 +29,10 @@ suites:
     environment:
       SNAP_NAME: opendkim
     prepare-each: |
-      SNAP_FILE="${CRAFT_ARTIFACT:-}"
-      if [ -z "$SNAP_FILE" ]; then
+      if [ -z "$CRAFT_ARTIFACT" ]; then
         echo "CRAFT_ARTIFACT is not set" >&2
         exit 1
       fi
-      snap install --dangerous --devmode "$SNAP_FILE"
+      snap install --dangerous --devmode "$CRAFT_ARTIFACT"
     restore-each: |
       snap remove --purge "$SNAP_NAME" || true
