@@ -1,0 +1,25 @@
+# Copyright 2026 Canonical Ltd.
+# See LICENSE file for licensing details.
+
+project: opendkim-snap
+
+backends:
+  craft:
+    type: craft
+    systems:
+      - ubuntu-24.04
+
+suites:
+  tests/spread/:
+    summary: Snap smoke and upstream-inspired behavior tests
+    environment:
+      SNAP_NAME: opendkim
+    prepare-each: |
+      SNAP_FILE="${CRAFT_ARTIFACT:-}"
+      if [ -z "$SNAP_FILE" ]; then
+        echo "CRAFT_ARTIFACT is not set" >&2
+        exit 1
+      fi
+      snap install --dangerous --devmode "$SNAP_FILE"
+    restore-each: |
+      snap remove --purge "$SNAP_NAME" || true

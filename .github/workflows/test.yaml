@@ -12,3 +12,24 @@ jobs:
       self-hosted-runner-label: "edge"
       with-uv: true
       working-directory: opendkim-operator
+
+  snap-build:
+    name: Build opendkim snap
+    uses: canonical/data-platform-workflows/.github/workflows/build_snap.yaml@v42.0.1
+    with:
+      path-to-snap-project-directory: ./opendkim-snap
+
+  snap-tests:
+    name: Snap spread tests
+    needs: snap-build
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: opendkim-snap
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install snapcraft
+        run: sudo snap install snapcraft --classic
+      - name: Run spread tests
+        run: snapcraft test
