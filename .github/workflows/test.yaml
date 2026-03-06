@@ -41,9 +41,9 @@ jobs:
         env:
           SPREAD_PASSWORD: ${{ github.run_id }}-${{ github.run_attempt }}
         run: |
-          SNAP_FILE=$(find . -maxdepth 1 -name "*.snap" | head -1)
+          SNAP_FILE=$(find . -name "*.snap" | head -1)
           if [ -z "$SNAP_FILE" ]; then
-            echo "Error: No .snap artifact found in current directory; cannot run spread tests."
+            echo "Error: No .snap artifact found; cannot run spread tests."
             exit 1
           fi
-          CRAFT_ARTIFACT="$SNAP_FILE" spread ci:
+          CRAFT_ARTIFACT="$(realpath "$SNAP_FILE")" spread ci:
