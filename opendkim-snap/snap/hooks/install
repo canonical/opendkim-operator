@@ -1,0 +1,19 @@
+#!/bin/bash
+set -e
+
+# Ensure directories exist in $SNAP_DATA for layouts
+mkdir -p "$SNAP_DATA/etc/dkimkeys"
+mkdir -p "$SNAP_DATA/run/opendkim"
+
+# Provide initial configuration file
+if [ ! -s "$SNAP_DATA/etc/opendkim.conf" ]; then
+    cp "$SNAP/etc/opendkim.conf" "$SNAP_DATA/etc/opendkim.conf"
+    
+    # Adjust the default conf to use snap_daemon instead of opendkim
+    sed -i 's/^UserID.*/#UserID snap_daemon/' "$SNAP_DATA/etc/opendkim.conf"
+    sed -i 's/^UMask.*/UMask 002/' "$SNAP_DATA/etc/opendkim.conf"
+fi
+
+# Set proper ownership for the run directory so snap_daemon can write the pid/socket
+# (Removed because daemon runs as root inside snap)
+
