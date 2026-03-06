@@ -36,7 +36,9 @@ jobs:
           merge-multiple: true
           path: opendkim-snap
       - name: Install spread
-        run: go install github.com/snapcore/spread/cmd/spread@latest
+        run: |
+          go install github.com/snapcore/spread/cmd/spread@latest
+          echo "$HOME/go/bin" >> $GITHUB_PATH
       - name: Run spread tests
         env:
           SPREAD_PASSWORD: ${{ github.run_id }}-${{ github.run_attempt }}
