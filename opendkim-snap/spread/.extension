@@ -125,7 +125,7 @@ discard_ci() {
         sudo systemctl daemon-reload
         sudo systemctl restart ssh
     fi
-    sudo passwd -d root || true
+    sudo passwd -l root || true
 }
 
 allocate() {
