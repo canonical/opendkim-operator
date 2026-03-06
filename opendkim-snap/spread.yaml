@@ -12,7 +12,7 @@ backends:
       - ubuntu-24.04:
           username: root
           password: $SPREAD_PASSWORD
-    allocate: spread/.extension allocate ci
+    allocate: ADDRESS $(spread/.extension allocate ci)
     discard: spread/.extension discard ci
     prepare: spread/.extension backend-prepare
     restore: spread/.extension backend-restore

@@ -36,7 +36,7 @@ jobs:
           merge-multiple: true
           path: opendkim-snap
       - name: Install spread
-        run: sudo snap install spread
+        run: go install github.com/canonical/spread/cmd/spread@latest
       - name: Run spread tests
         env:
           SPREAD_PASSWORD: ${{ github.run_id }}-${{ github.run_attempt }}
