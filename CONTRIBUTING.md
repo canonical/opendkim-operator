@@ -147,6 +147,41 @@ that can be used for linting and formatting code when you're preparing contribut
 * ``tox -e unit``: Runs the unit tests.
 * ``tox -e integration``: Runs the integration tests.
 
+### Snap spread tests
+
+The `opendkim-snap/` directory contains spread tests that verify the snap package works correctly.
+In CI these run on the GitHub Actions runner itself (the `ci` backend). Locally, they run inside
+an LXD VM using the `craft` backend through `snapcraft test`.
+
+**Prerequisites:**
+
+```bash
+sudo snap install lxd
+sudo adduser "$USER" lxd
+newgrp lxd
+lxd init --auto
+sudo snap install snapcraft --classic
+```
+
+**Build and test the snap in one step (recommended):**
+
+```bash
+cd opendkim-snap
+snapcraft test
+```
+
+This builds the snap and then runs all spread tests inside an LXD VM automatically.
+
+**Run spread tests against an already-built snap:**
+
+If you have already packed the snap (e.g. with `snapcraft pack`), you can run the spread tests
+directly against it using the LXD VM backend:
+
+```bash
+cd opendkim-snap
+CRAFT_ARTIFACT=./opendkim_*.snap spread craft:
+```
+
 ### Build the charm
 
 Build the charm in this git repository using:
