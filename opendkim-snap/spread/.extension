@@ -94,7 +94,7 @@ allocate_lxdvm() {
 
     ADDR=""
     while [ -z "$ADDR" ]; do ADDR=$(lxc ls -f csv | grep "^${VM_NAME}" | cut -d"," -f3 | cut -d" " -f1); done
-    echo "$ADDR" 1>&3
+    ADDRESS=$ADDR
 }
 
 discard_lxdvm() {
@@ -115,7 +115,7 @@ allocate_ci() {
 
     echo "root:${SPREAD_PASSWORD}" | sudo chpasswd || true
 
-    echo localhost >&3
+    ADDRESS=localhost
 }
 
 discard_ci() {

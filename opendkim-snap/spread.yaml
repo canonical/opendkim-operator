@@ -6,13 +6,8 @@ project: opendkim-snap
 path: /root/spread/opendkim-snap
 
 backends:
-  craft:
-    type: craft
-    systems:
-      - ubuntu-24.04
-
   ci:
-    type: external
+    type: adhoc
     systems:
       - ubuntu-24.04:
           username: root
