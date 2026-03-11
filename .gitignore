@@ -19,7 +19,6 @@ opendkim-snap/snap/prime/
 opendkim-snap/snap/stage/
 opendkim-snap/snap/.craft/
 opendkim-snap/snap/overlay/
-opendkim-snap/snap/*.bak
 
 # BEGIN VALE WORKFLOW IGNORE
 .vale/styles/*

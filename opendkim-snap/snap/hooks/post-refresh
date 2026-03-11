@@ -1,4 +1,6 @@
 #!/bin/bash
+# Copyright 2026 Canonical Ltd.
+# See LICENSE file for licensing details.
 set -e
 
 # Ensure directories exist in $SNAP_DATA for layouts
@@ -13,7 +15,4 @@ if [ ! -s "$SNAP_DATA/etc/opendkim.conf" ]; then
     sed -i 's/^UserID.*/#UserID snap_daemon/' "$SNAP_DATA/etc/opendkim.conf"
     sed -i 's/^UMask.*/UMask 002/' "$SNAP_DATA/etc/opendkim.conf"
 fi
-
-# Set proper ownership for the run directory so snap_daemon can write the pid/socket
-# (Removed because daemon runs as root inside snap)
 

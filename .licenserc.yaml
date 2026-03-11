@@ -28,5 +28,4 @@ header:
   - 'opendkim-operator/templates/opendkim.conf.j2'
   - 'opendkim-operator/tests/unit/files/**'
   - '**/uv.lock'
-  - 'opendkim-snap/snap/hooks/**'
   comment: on-failure
