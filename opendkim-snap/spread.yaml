@@ -33,6 +33,6 @@ suites:
         echo "CRAFT_ARTIFACT is not set" >&2
         exit 1
       fi
-      snap install --dangerous --devmode "$CRAFT_ARTIFACT"
+      snap install --dangerous "$CRAFT_ARTIFACT"
     restore-each: |
       snap remove --purge "$SNAP_NAME" || true

@@ -4,7 +4,8 @@
 summary: Verify opendkim accepts valid config and rejects invalid config
 
 execute: |
-  tmpdir=$(mktemp -d "$HOME/${SNAP_NAME}-config-XXXXXX")
+  snap_data="/var/snap/opendkim/current"
+  tmpdir=$(mktemp -d "$snap_data/${SNAP_NAME}-config-XXXXXX")
   trap 'rm -rf "$tmpdir"' EXIT
 
   good_cfg="$tmpdir/opendkim.good.conf"

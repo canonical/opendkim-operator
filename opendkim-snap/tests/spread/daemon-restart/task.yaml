@@ -19,7 +19,9 @@ execute: |
     'UserID                  root' \
     > "$conf_file"
 
-  echo "Restarting daemon with valid config..."
+  # Reset any prior failure state from the daemon crash-looping on the
+  # default config at snap-install time, then start with our valid config.
+  systemctl reset-failed snap.opendkim.daemon.service || true
   snap restart "$SNAP_NAME.daemon"
 
   echo "Waiting for daemon to be active..."
@@ -37,8 +39,8 @@ execute: |
   echo "Daemon running with PID $original_pid"
   test -n "$original_pid"
 
-  echo "Killing daemon process..."
-  kill "$original_pid"
+  echo "Killing daemon process with SIGKILL..."
+  kill -9 "$original_pid"
 
   echo "Waiting for daemon to be restarted by snapd..."
   retry=0
