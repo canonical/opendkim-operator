@@ -12,16 +12,14 @@ execute: |
 
   printf '%s\n' \
     'Syslog                  yes' \
-    'UMask                   002' \
+    'UMask                   007' \
     'Mode                    sv' \
     'Socket                  inet:8892@localhost' \
     'PidFile                 /var/snap/opendkim/current/run/opendkim/opendkim.pid' \
     'UserID                  root' \
     > "$conf_file"
 
-  # Reset any prior failure state from the daemon crash-looping on the
-  # default config at snap-install time, then start with our valid config.
-  systemctl reset-failed snap.opendkim.daemon.service || true
+  # Restart the daemon with our test config.
   snap restart "$SNAP_NAME.daemon"
 
   echo "Waiting for daemon to be active..."

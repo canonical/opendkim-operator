@@ -14,7 +14,7 @@ execute: |
   echo "Testing valid configuration..."
   printf '%s\n' \
     'Syslog                  yes' \
-    'UMask                   002' \
+    'UMask                   007' \
     'Canonicalization        relaxed/simple' \
     'Mode                    sv' \
     'Socket                  local:/var/snap/opendkim/current/run/opendkim/opendkim.sock' \
