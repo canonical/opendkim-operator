@@ -65,7 +65,7 @@ def test_install(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
         check=False,
     )
     subprocess_run_mock.assert_any_call(
-        ["snap", "install", "opendkim", "--devmode"],
+        ["snap", "install", "opendkim"],
         timeout=300,
         check=True,
     )

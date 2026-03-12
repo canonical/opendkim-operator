@@ -58,7 +58,7 @@ def _replace_snap_on_unit(juju: jubilant.Juju, app_name: str) -> None:
     """Replace the store-installed opendkim snap with the locally-built one.
 
     Finds the snap artifact built by setup-integration-tests.sh, copies it
-    to each unit's machine, and installs it with --dangerous --devmode.
+    to each unit's machine, and installs it with --dangerous.
 
     Args:
         juju: The Juju client.
@@ -80,7 +80,7 @@ def _replace_snap_on_unit(juju: jubilant.Juju, app_name: str) -> None:
         machine = unit.machine
         # Copy snap to the machine
         juju.cli("scp", snap_path, f"{unit_name}:/tmp/{snap_name}")
-        # Install with --dangerous --devmode, replacing the store version
+        # Install with --dangerous, replacing the store version
         juju.cli(
             "exec",
             "--unit",
@@ -90,7 +90,6 @@ def _replace_snap_on_unit(juju: jubilant.Juju, app_name: str) -> None:
             "snap",
             "install",
             "--dangerous",
-            "--devmode",
             f"/tmp/{snap_name}",
         )
         logger.info("Replaced opendkim snap on unit %s (machine %s)", unit_name, machine)

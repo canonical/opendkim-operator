@@ -93,7 +93,7 @@ Install local artifact:
 
 ```bash
 sudo snap remove opendkim || true
-sudo snap install --dangerous --devmode ./opendkim_2.11.0-beta2_amd64.snap
+sudo snap install --dangerous ./opendkim_2.11.0-beta2_amd64.snap
 ```
 
 Validate key generation using a home temp directory and explicit output directory:
@@ -172,7 +172,7 @@ snapcraft pack
 
 # Install snap
 sudo snap remove opendkim || true
-sudo snap install --dangerous --devmode ./opendkim_2.11.0-beta2_amd64.snap
+sudo snap install --dangerous ./opendkim_2.11.0-beta2_amd64.snap
 
 # Verify genkey
 tmpdir=$(mktemp -d "$HOME/opendkim-genkey-XXXXXX")

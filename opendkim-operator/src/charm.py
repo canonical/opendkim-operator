@@ -101,7 +101,7 @@ class OpenDKIMCharm(ops.CharmBase):
 
             if not snap_installed:
                 subprocess.run(  # nosec
-                    ["snap", "install", OPENDKIM_SNAP_NAME, "--devmode"],
+                    ["snap", "install", OPENDKIM_SNAP_NAME],
                     timeout=300,
                     check=True,
                 )
