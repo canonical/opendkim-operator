@@ -96,10 +96,5 @@ parts:
       fi
 
       # Fix perl shebangs for tools
-      if [ -f $CRAFT_PART_INSTALL/usr/sbin/opendkim-genkey ]; then
-        sed -i 's|^#!/usr/bin/perl|#!/usr/bin/env perl|g' $CRAFT_PART_INSTALL/usr/sbin/opendkim-genkey
-      fi
-
-      if [ -f $CRAFT_PART_INSTALL/usr/sbin/opendkim-genstats ]; then
-        sed -i 's|^#!/usr/bin/perl|#!/usr/bin/env perl|g' $CRAFT_PART_INSTALL/usr/sbin/opendkim-genstats
-      fi
+      grep -rl '^#!/usr/bin/perl' $CRAFT_PART_INSTALL/usr/sbin/ | \
+        xargs -r sed -i 's|^#!/usr/bin/perl|#!/usr/bin/env perl|'
