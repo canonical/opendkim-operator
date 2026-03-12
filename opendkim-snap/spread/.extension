@@ -133,7 +133,7 @@ allocate() {
         allocate_ci
         ;;
     *)
-        echo "unsupported backend $1" 2>&1
+        echo "unsupported backend $1" >&2
         ;;
     esac
 }
@@ -147,7 +147,7 @@ discard() {
         discard_ci
         ;;
     *)
-        echo "unsupported backend $1" 2>&1
+        echo "unsupported backend $1" >&2
         ;;
     esac
 }

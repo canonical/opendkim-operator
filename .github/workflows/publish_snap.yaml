@@ -41,7 +41,7 @@ jobs:
   promote:
     name: Promote snap
     if: ${{ inputs.promote-to != '' }}
-    needs: build
+    needs: [build, release-edge]
     uses: canonical/data-platform-workflows/.github/workflows/release_snap.yaml@v42.0.1
     with:
       channel: ${{ inputs.promote-to }}
