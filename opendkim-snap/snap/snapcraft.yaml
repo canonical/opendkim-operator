@@ -82,18 +82,10 @@ parts:
       mkdir -p $CRAFT_PART_INSTALL/etc/dkimkeys
       mkdir -p $CRAFT_PART_INSTALL/run/opendkim
 
-      # Install default config from whichever source path exists
-      for sample in opendkim/opendkim.conf.sample opendkim.conf.sample; do
-        if [ ! -f $CRAFT_PART_INSTALL/etc/opendkim.conf ] && [ -f "$sample" ]; then
-          install -Dm644 "$sample" $CRAFT_PART_INSTALL/etc/opendkim.conf
-        fi
-      done
-
-      if [ -f $CRAFT_PART_INSTALL/etc/opendkim.conf ]; then
-        sed -i 's/^UserID.*/#UserID snap_daemon/' $CRAFT_PART_INSTALL/etc/opendkim.conf
-        sed -i 's/^UMask.*/UMask 002/' $CRAFT_PART_INSTALL/etc/opendkim.conf
-        sed -i 's|/run/opendkim|/var/snap/opendkim/current/run/opendkim|g' $CRAFT_PART_INSTALL/etc/opendkim.conf
-      fi
+      # Install curated default configuration (based on the Debian/Ubuntu
+      # opendkim package config, adapted for snap paths).
+      install -Dm644 $CRAFT_PROJECT_DIR/snap/local/opendkim.conf \
+        $CRAFT_PART_INSTALL/etc/opendkim.conf
 
       # Fix perl shebangs for tools
       grep -rl '^#!/usr/bin/perl' $CRAFT_PART_INSTALL/usr/sbin/ | \
