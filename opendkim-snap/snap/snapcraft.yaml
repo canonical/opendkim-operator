@@ -82,13 +82,12 @@ parts:
       mkdir -p $CRAFT_PART_INSTALL/etc/dkimkeys
       mkdir -p $CRAFT_PART_INSTALL/run/opendkim
 
-      if [ ! -f $CRAFT_PART_INSTALL/etc/opendkim.conf ] && [ -f opendkim/opendkim.conf.sample ]; then
-        install -Dm644 opendkim/opendkim.conf.sample $CRAFT_PART_INSTALL/etc/opendkim.conf
-      fi
-
-      if [ ! -f $CRAFT_PART_INSTALL/etc/opendkim.conf ] && [ -f opendkim.conf.sample ]; then
-        install -Dm644 opendkim.conf.sample $CRAFT_PART_INSTALL/etc/opendkim.conf
-      fi
+      # Install default config from whichever source path exists
+      for sample in opendkim/opendkim.conf.sample opendkim.conf.sample; do
+        if [ ! -f $CRAFT_PART_INSTALL/etc/opendkim.conf ] && [ -f "$sample" ]; then
+          install -Dm644 "$sample" $CRAFT_PART_INSTALL/etc/opendkim.conf
+        fi
+      done
 
       if [ -f $CRAFT_PART_INSTALL/etc/opendkim.conf ]; then
         sed -i 's/^UserID.*/#UserID snap_daemon/' $CRAFT_PART_INSTALL/etc/opendkim.conf
