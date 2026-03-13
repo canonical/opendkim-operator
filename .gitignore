@@ -12,6 +12,9 @@ __pycache__/
 */*.rock
 terraform/tests/.terraform
 
+# Snap build artifacts
+*.snap
+
 # BEGIN VALE WORKFLOW IGNORE
 .vale/styles/*
 !.vale/styles/local

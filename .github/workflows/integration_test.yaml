@@ -13,11 +13,12 @@ jobs:
       extra-arguments: '-x --log-format="%(asctime)s %(levelname)s %(message)s"'
       juju-channel: 3/stable
       modules: '["test_charm.py"]'
-      pre-run-script: ./tests/integration/setup-integration-tests.sh
+      pre-run-script: ./opendkim-operator/tests/integration/setup-integration-tests.sh
       provider: lxd
       self-hosted-runner-label: "edge"
       self-hosted-runner: true
       with-uv: true
+      working-directory: opendkim-operator
   allure-report:
     if: ${{ !cancelled() && github.event_name == 'schedule' }}
     needs:
