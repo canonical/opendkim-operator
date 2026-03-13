@@ -33,7 +33,7 @@ execute: |
   done
   snap services "$SNAP_NAME.daemon" | grep -q "active"
 
-  original_pid=$(pidof opendkim)
+  original_pid=$(pidof -s opendkim)
   echo "Daemon running with PID $original_pid"
   test -n "$original_pid"
 
@@ -43,7 +43,7 @@ execute: |
   echo "Waiting for daemon to be restarted by snapd..."
   retry=0
   while [ "$retry" -lt 30 ]; do
-    new_pid=$(pidof opendkim 2>/dev/null || true)
+    new_pid=$(pidof -s opendkim 2>/dev/null || true)
     if [ -n "$new_pid" ] && [ "$new_pid" != "$original_pid" ]; then
       break
     fi
@@ -51,7 +51,7 @@ execute: |
     sleep 1
   done
 
-  new_pid=$(pidof opendkim)
+  new_pid=$(pidof -s opendkim)
   echo "Daemon restarted with PID $new_pid"
   test -n "$new_pid"
   test "$new_pid" != "$original_pid"
