@@ -27,7 +27,7 @@ apps:
       - system-observe
 
   daemon:
-    command: usr/sbin/opendkim -f -x /var/snap/opendkim/current/etc/opendkim.conf
+    command: usr/sbin/opendkim -f -x /etc/opendkim.conf
     daemon: simple
     plugs:
       - network
