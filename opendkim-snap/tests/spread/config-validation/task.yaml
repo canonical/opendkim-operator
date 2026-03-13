@@ -4,7 +4,7 @@
 summary: Verify opendkim accepts valid config and rejects invalid config
 
 execute: |
-  snap_data="/var/snap/opendkim/current"
+  snap_data="/var/snap/${SNAP_NAME}/current"
   tmpdir=$(mktemp -d "$snap_data/${SNAP_NAME}-config-XXXXXX")
   trap 'rm -rf "$tmpdir"' EXIT
 
@@ -17,8 +17,8 @@ execute: |
     'UMask                   007' \
     'Canonicalization        relaxed/simple' \
     'Mode                    sv' \
-    'Socket                  local:/var/snap/opendkim/current/run/opendkim/opendkim.sock' \
-    'PidFile                 /var/snap/opendkim/current/run/opendkim/opendkim.pid' \
+    "Socket                  local:${snap_data}/run/opendkim/opendkim.sock" \
+    "PidFile                 ${snap_data}/run/opendkim/opendkim.pid" \
     'UserID                  root' \
     > "$good_cfg"
 

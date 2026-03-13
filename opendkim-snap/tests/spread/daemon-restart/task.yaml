@@ -4,9 +4,9 @@
 summary: Verify snap daemon is restarted automatically after being killed
 
 execute: |
-  conf_dir="/var/snap/opendkim/current/etc"
+  conf_dir="/var/snap/${SNAP_NAME}/current/etc"
   conf_file="$conf_dir/opendkim.conf"
-  run_dir="/var/snap/opendkim/current/run/opendkim"
+  run_dir="/var/snap/${SNAP_NAME}/current/run/opendkim"
 
   mkdir -p "$conf_dir" "$run_dir"
 
@@ -15,7 +15,7 @@ execute: |
     'UMask                   007' \
     'Mode                    sv' \
     'Socket                  inet:8892@localhost' \
-    'PidFile                 /var/snap/opendkim/current/run/opendkim/opendkim.pid' \
+    "PidFile                 ${run_dir}/opendkim.pid" \
     'UserID                  root' \
     > "$conf_file"
 
