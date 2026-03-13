@@ -91,6 +91,8 @@ allocate_lxdvm() {
     lxc exec "${VM_NAME}" -- sed -i 's/^[[:space:]]*#\?[[:space:]]*\(PermitRootLogin\|PasswordAuthentication\)\>.*/\1 yes/' /etc/ssh/sshd_config
     lxc exec "${VM_NAME}" -- bash -c "if [ -d /etc/ssh/sshd_config.d ]; then echo -e 'PermitRootLogin yes\nPasswordAuthentication yes' > /etc/ssh/sshd_config.d/00-spread.conf; fi"
     lxc exec "${VM_NAME}" -- bash -c "echo root:${SPREAD_PASSWORD} | sudo chpasswd || true"
+    lxc exec "${VM_NAME}" -- bash -c 'command -v systemctl >/dev/null 2>&1 && systemctl daemon-reload || true'
+    lxc exec "${VM_NAME}" -- bash -c 'command -v systemctl >/dev/null 2>&1 && (systemctl restart ssh || systemctl restart sshd) || (service ssh restart || service sshd restart || true)'
 
     ADDR=""
     while [ -z "$ADDR" ]; do ADDR=$(lxc ls -f csv | grep "^${VM_NAME}" | cut -d"," -f3 | cut -d" " -f1); done
