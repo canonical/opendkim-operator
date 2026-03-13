@@ -29,7 +29,6 @@ apps:
   daemon:
     command: usr/sbin/opendkim -f -x /etc/opendkim.conf
     daemon: simple
-    restart-condition: on-failure
     plugs:
       - network
       - network-bind

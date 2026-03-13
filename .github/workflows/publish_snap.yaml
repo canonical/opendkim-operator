@@ -17,6 +17,8 @@ on:
   push:
     branches:
       - main
+    paths:
+      - opendkim-snap/**
 
 jobs:
   build:
