@@ -23,7 +23,7 @@ jobs:
         uses: canonical/setup-lxd@main
       - name: Install snapcraft
         run: sudo snap install snapcraft --classic
-      - name: Generate spread .extension
+      - name: Generate spread .extension (required by snapcraft test but not auto-generated)
         working-directory: opendkim-snap
         run: |
           tmpdir=$(mktemp -d)
