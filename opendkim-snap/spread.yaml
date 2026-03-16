@@ -3,36 +3,23 @@
 
 project: opendkim-snap
 
-path: /root/spread/opendkim-snap
-
-environment:
-  PROJECT_PATH: /root/spread/opendkim-snap
-  CRAFT_ARTIFACT: '$(HOST: echo "$CRAFT_ARTIFACT")'
-
 backends:
-  ci:
-    type: adhoc
+  craft:
+    type: craft
     systems:
-      - ubuntu-24.04:
-          username: root
-          password: $SPREAD_PASSWORD
-    allocate: ADDRESS $(spread/.extension allocate ci)
-    discard: ./spread/.extension discard ci
-    prepare: "$PROJECT_PATH/spread/.extension backend-prepare"
-    restore: "$PROJECT_PATH/spread/.extension backend-restore"
-    prepare-each: "$PROJECT_PATH/spread/.extension backend-prepare-each"
-    restore-each: "$PROJECT_PATH/spread/.extension backend-restore-each"
+      - ubuntu-24.04
 
 suites:
-  tests/spread/:
+  spread/general/:
     summary: Snap smoke and upstream-inspired behavior tests
     environment:
       SNAP_NAME: opendkim
     prepare-each: |
-      if [ -z "$CRAFT_ARTIFACT" ]; then
-        echo "CRAFT_ARTIFACT is not set" >&2
-        exit 1
-      fi
-      snap install --dangerous "$CRAFT_ARTIFACT"
+      snap install "$CRAFT_ARTIFACT" --dangerous --jailmode
     restore-each: |
       snap remove --purge "$SNAP_NAME" || true
+
+exclude:
+  - .git
+
+kill-timeout: 1h

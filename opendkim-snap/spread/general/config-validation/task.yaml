@@ -1,0 +1,11 @@
+# Copyright 2026 Canonical Ltd.
+# See LICENSE file for licensing details.
+
+summary: Verify opendkim accepts valid config and rejects invalid config
+
+execute: |
+  echo "Testing valid configuration..."
+  snap run "${SNAP_NAME}.opendkim" -n -x ./valid.conf
+
+  echo "Testing invalid configuration..."
+  ! snap run "${SNAP_NAME}.opendkim" -n -x ./invalid.conf

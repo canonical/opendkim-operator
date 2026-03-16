@@ -3,10 +3,10 @@
 
 summary: Verify snap app commands are accessible and respond correctly
 
-execute: |
-  echo "Checking snap is installed..."
+prepare: |
   snap list "$SNAP_NAME"
 
+execute: |
   echo "Checking opendkim.genkey help..."
   snap run "${SNAP_NAME}.genkey" --help
 

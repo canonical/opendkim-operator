@@ -13,39 +13,23 @@ jobs:
       with-uv: true
       working-directory: opendkim-operator
 
-  snap-build:
-    name: Build opendkim snap
-    uses: canonical/data-platform-workflows/.github/workflows/build_snap.yaml@v42.0.1
-    with:
-      path-to-snap-project-directory: ./opendkim-snap
-
   snap-tests:
     name: Snap spread tests
-    needs: snap-build
     runs-on: ubuntu-24.04
-    defaults:
-      run:
-        working-directory: opendkim-snap
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Download snap artifact
-        uses: actions/download-artifact@v4
-        with:
-          pattern: ${{ needs.snap-build.outputs.artifact-prefix }}-*
-          merge-multiple: true
-          path: opendkim-snap
-      - name: Install spread
+      - name: Install snapcraft
+        run: sudo snap install snapcraft --classic
+      - name: Generate spread .extension
+        working-directory: opendkim-snap
         run: |
-          go install github.com/snapcore/spread/cmd/spread@latest
-          echo "$HOME/go/bin" >> $GITHUB_PATH
+          tmpdir=$(mktemp -d)
+          mkdir -p "$tmpdir/snap"
+          cp snap/snapcraft.yaml "$tmpdir/snap/"
+          snapcraft init --profile test "$tmpdir"
+          cp "$tmpdir/spread/.extension" spread/.extension
+          rm -rf "$tmpdir"
       - name: Run spread tests
-        env:
-          SPREAD_PASSWORD: ${{ github.run_id }}-${{ github.run_attempt }}
-        run: |
-          SNAP_FILE=$(find . -name "*.snap" | head -1)
-          if [ -z "$SNAP_FILE" ]; then
-            echo "Error: No .snap artifact found; cannot run spread tests."
-            exit 1
-          fi
-          CRAFT_ARTIFACT="$(realpath "$SNAP_FILE")" spread ci:
+        run: snapcraft test
+        working-directory: opendkim-snap
