@@ -4,27 +4,27 @@
 summary: Verify snap daemon is restarted automatically after being killed
 
 execute: |
-  conf_dir="/var/snap/${SNAP_NAME}/current/etc"
+  conf_dir="/var/snap/opendkim/current/etc"
   conf_file="$conf_dir/opendkim.conf"
-  run_dir="/var/snap/${SNAP_NAME}/current/run/opendkim"
+  run_dir="/var/snap/opendkim/current/run/opendkim"
 
   mkdir -p "$conf_dir" "$run_dir"
 
-  sed "s/__SNAP_NAME__/${SNAP_NAME}/g" ./opendkim.conf > "$conf_file"
+  cp ./opendkim.conf "$conf_file"
 
   # Restart the daemon with our test config.
-  snap restart "$SNAP_NAME.daemon"
+  snap restart opendkim.daemon
 
   echo "Waiting for daemon to be active..."
   retry=0
   while [ "$retry" -lt 30 ]; do
-    if snap services "$SNAP_NAME.daemon" | grep -q "active"; then
+    if snap services opendkim.daemon | grep -q "active"; then
       break
     fi
     retry=$((retry + 1))
     sleep 1
   done
-  snap services "$SNAP_NAME.daemon" | grep -q "active"
+  snap services opendkim.daemon | grep -q "active"
 
   original_pid=$(pidof opendkim)
   echo "Daemon running with PID $original_pid"
@@ -50,4 +50,4 @@ execute: |
   test "$new_pid" != "$original_pid"
 
   echo "Verifying daemon is active..."
-  snap services "$SNAP_NAME.daemon" | grep -q "active"
+  snap services opendkim.daemon | grep -q "active"

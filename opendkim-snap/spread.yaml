@@ -12,12 +12,10 @@ backends:
 suites:
   spread/general/:
     summary: Snap smoke and upstream-inspired behavior tests
-    environment:
-      SNAP_NAME: opendkim
     prepare-each: |
       snap install "$CRAFT_ARTIFACT" --dangerous --jailmode
     restore-each: |
-      snap remove --purge "$SNAP_NAME" || true
+      snap remove --purge opendkim || true
 
 exclude:
   - .git

@@ -4,14 +4,14 @@
 summary: Verify DKIM key generation, test-mode keys, and short-key rejection
 
 execute: |
-  tmpdir=$(mktemp -d "$HOME/${SNAP_NAME}-keygen-XXXXXX")
+  tmpdir=$(mktemp -d "$HOME/opendkim-keygen-XXXXXX")
   trap 'rm -rf "$tmpdir"' EXIT
 
   selector="default"
   domain="testrelay.internal"
 
   echo "Running basic key generation..."
-  snap run "${SNAP_NAME}.genkey" -s "$selector" -d "$domain" -D "$tmpdir"
+  snap run opendkim.genkey -s "$selector" -d "$domain" -D "$tmpdir"
 
   test -f "$tmpdir/${selector}.private"
   test -f "$tmpdir/${selector}.txt"
@@ -19,11 +19,11 @@ execute: |
 
   echo "Running test-mode key generation..."
   selector_test="testmode"
-  snap run "${SNAP_NAME}.genkey" -t -s "$selector_test" -d "$domain" -D "$tmpdir"
+  snap run opendkim.genkey -t -s "$selector_test" -d "$domain" -D "$tmpdir"
 
   test -f "$tmpdir/${selector_test}.txt"
   grep -q "t=y" "$tmpdir/${selector_test}.txt"
 
   echo "Verifying short key rejection..."
-  short_key_output=$(snap run "${SNAP_NAME}.genkey" -b 512 -s tooshort -d "$domain" -D "$tmpdir" 2>&1 || true)
+  short_key_output=$(snap run opendkim.genkey -b 512 -s tooshort -d "$domain" -D "$tmpdir" 2>&1 || true)
   echo "$short_key_output" | grep -qi "minimum 1024-bit keys"
