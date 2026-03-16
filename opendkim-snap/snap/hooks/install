@@ -11,4 +11,3 @@ mkdir -p "$SNAP_DATA/run/opendkim"
 if [ ! -s "$SNAP_DATA/etc/opendkim.conf" ]; then
     cp "$SNAP/etc/opendkim.conf" "$SNAP_DATA/etc/opendkim.conf"
 fi
-

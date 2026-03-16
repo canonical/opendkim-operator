@@ -12,3 +12,17 @@ jobs:
       self-hosted-runner-label: "edge"
       with-uv: true
       working-directory: opendkim-operator
+
+  snap-tests:
+    name: Snap spread tests
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up LXD
+        uses: canonical/setup-lxd@main
+      - name: Install snapcraft
+        run: sudo snap install snapcraft --classic
+      - name: Run spread tests
+        run: CI=1 snapcraft test
+        working-directory: opendkim-snap
