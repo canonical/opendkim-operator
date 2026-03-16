@@ -1,4 +1,6 @@
 #!/bin/bash
+# Copyright 2026 Canonical Ltd.
+# See LICENSE file for licensing details.
 
 usage() {
     echo "usage: $(basename "$0") [command]"
