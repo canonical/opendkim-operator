@@ -10,14 +10,7 @@ execute: |
 
   mkdir -p "$conf_dir" "$run_dir"
 
-  printf '%s\n' \
-    'Syslog                  yes' \
-    'UMask                   007' \
-    'Mode                    sv' \
-    'Socket                  inet:8892@localhost' \
-    "PidFile                 ${run_dir}/opendkim.pid" \
-    'UserID                  root' \
-    > "$conf_file"
+  sed "s/__SNAP_NAME__/${SNAP_NAME}/g" ./opendkim.conf > "$conf_file"
 
   # Restart the daemon with our test config.
   snap restart "$SNAP_NAME.daemon"
