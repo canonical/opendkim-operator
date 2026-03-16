@@ -90,7 +90,7 @@ def _replace_snap_on_unit(juju: jubilant.Juju, app_name: str) -> None:
             "snap",
             "install",
             "--dangerous",
-            f"/tmp/{snap_name}",
+            f"/tmp/{snap_name}",  # nosec B108 — Juju copies resources to /tmp
         )
         logger.info("Replaced opendkim snap on unit %s (machine %s)", unit_name, machine)
 

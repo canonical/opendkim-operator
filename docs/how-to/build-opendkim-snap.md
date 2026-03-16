@@ -17,7 +17,7 @@ Produce a local OpenDKIM snap that:
 - Charm that installs the snap from the store: `opendkim-operator/src/charm.py`
 - Integration test helper invoking key generation: `opendkim-operator/tests/integration/test_charm.py`
 
-## 1) Reproduce the failure first
+## Reproduce the failure first
 
 We started by reproducing the failing command from the integration tests:
 
@@ -36,7 +36,7 @@ opendkim-genkey: openssl exited with status %d
 
 This confirmed the issue was reproducible outside of pytest.
 
-## 2) Confirm root causes
+## Confirm root causes
 
 ### Root cause A: `openssl` not available in snap payload/runtime
 
@@ -48,7 +48,7 @@ Without `openssl` in the snap runtime, key generation fails.
 Even after adding `openssl`, key generation failed when writing in paths not allowed by confinement.
 Using a home-based temporary directory and granting the `home` plug for the `genkey` app resolved this.
 
-## 3) Patch snapcraft configuration
+## Patch Snapcraft configuration
 
 We updated `opendkim-snap/snap/snapcraft.yaml`:
 
@@ -73,7 +73,7 @@ parts:
       - dns-root-data
 ```
 
-## 4) Build the snap
+## Build the snap
 
 From `opendkim-snap/`:
 
@@ -87,7 +87,7 @@ This produces:
 opendkim_2.11.0-beta2_amd64.snap
 ```
 
-## 5) Install and validate locally
+## Install and validate locally
 
 Install local artifact:
 
@@ -118,7 +118,7 @@ snapcraft test
 
 This builds the snap and runs all spread tasks under `tests/spread/` (`snap-apps/`, `keygen/`, `config-validation/`) inside an LXD VM.
 
-## 6) Align integration test helper with confinement
+## Align integration test helper with confinement
 
 In `opendkim-operator/tests/integration/test_charm.py`, generate keys in a home temp directory and pass `-D`:
 
@@ -127,7 +127,7 @@ In `opendkim-operator/tests/integration/test_charm.py`, generate keys in a home 
 
 This makes test behavior match snap confinement constraints.
 
-## 7) Rebuild charm artifact cleanly before testing
+## Rebuild charm artifact cleanly before testing
 
 When validating with the charm, use a clean build as requested:
 
@@ -144,7 +144,7 @@ cd opendkim-operator
 tox -e integration -- --charm-file opendkim_amd64.charm
 ```
 
-## 8) Additional charm robustness fixes discovered during testing
+## Additional charm robustness fixes discovered during testing
 
 While running integration tests, we also hit charm-side issues unrelated to `opendkim.genkey` packaging. We addressed these to keep test runs moving:
 

@@ -17,7 +17,7 @@ juju integrate smtp-relay opendkim
 juju wait -w
 ```
 
-## 1) Start MailCatcher
+## Start the MailCatcher service
 
 From the repository root:
 
@@ -28,7 +28,7 @@ curl -sS http://127.0.0.1:1080/messages
 
 The second command should return `[]` (or a JSON array).
 
-## 2) Generate a DKIM key and create/update Juju secret
+## Generate a DKIM key and create or update the Juju secret
 
 ```bash
 DOMAIN=testrelay.internal
@@ -46,7 +46,7 @@ SECRET_ID=$(juju show-secret opendkimsecret --format yaml | awk '/^uri:/{print $
 juju grant-secret "$SECRET_ID" opendkim
 ```
 
-## 3) Configure OpenDKIM and smtp-relay
+## Configure both applications
 
 ```bash
 juju config opendkim \
@@ -58,7 +58,7 @@ juju config smtp-relay relay_domains="- ${DOMAIN}"
 juju wait -w
 ```
 
-## 4) Point smtp-relay unit to the local MailCatcher host
+## Route the relay unit to the local mailcatcher host
 
 This matches what the integration test does by updating `/etc/hosts` on the `smtp-relay` machine.
 
@@ -70,7 +70,7 @@ juju exec --machine "$SMTP_RELAY_MACHINE" \
   "echo ${RUNNER_IP} ${DOMAIN} | sudo tee -a /etc/hosts"
 ```
 
-## 5) Send a test email through smtp-relay
+## Send a test email through smtp-relay
 
 ```bash
 SMTP_RELAY_IP=$(juju show-unit smtp-relay/0 --format yaml | awk '/public-address:/{print $2; exit}')
@@ -94,7 +94,7 @@ with smtplib.SMTP(smtp_relay_ip) as server:
 PY
 ```
 
-## 6) Verify message and DKIM signature
+## Verify message and DKIM signature
 
 ```bash
 MSG_ID=$(curl -sS http://127.0.0.1:1080/messages \
@@ -106,7 +106,7 @@ curl -sS "http://127.0.0.1:1080/messages/${MSG_ID}.source" | grep "DKIM-Signatur
 
 If `grep` returns a matching line, DKIM signing worked.
 
-## 7) Validate inside the OpenDKIM charm unit container
+## Validate inside the OpenDKIM charm unit container
 
 ```bash
 juju ssh opendkim/0 "sudo ls -l /var/snap/opendkim/current/etc/dkimkeys"
