@@ -19,6 +19,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Set up LXD
+        uses: canonical/setup-lxd@main
       - name: Install snapcraft
         run: sudo snap install snapcraft --classic
       - name: Generate spread .extension

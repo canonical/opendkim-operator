@@ -150,7 +150,7 @@ that can be used for linting and formatting code when you're preparing contribut
 ### Snap spread tests
 
 The `opendkim-snap/` directory contains spread tests that verify the snap package works correctly.
-In CI these run via `snapcraft test` on the GitHub Actions runner. Locally, `snapcraft test`
+In CI these run using `snapcraft test` on the GitHub Actions runner. Locally, `snapcraft test`
 launches an LXD VM, builds the snap inside it, and runs the spread tests automatically.
 
 **Prerequisites:**
