@@ -86,5 +86,6 @@ def write_file(path: Path, content: str, mode: int, user: str) -> None:
     try:
         u = pwd.getpwnam(user)
     except KeyError:
+        # Fallback to root if user does not exist (e.g., opendkim snap not yet installed).
         u = pwd.getpwnam("root")
     os.chown(path, uid=u.pw_uid, gid=u.pw_gid)

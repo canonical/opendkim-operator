@@ -90,22 +90,11 @@ class OpenDKIMCharm(ops.CharmBase):
             True if the snap was installed successfully, False otherwise.
         """
         try:
-            snap_installed = (
-                subprocess.run(  # nosec
-                    ["snap", "list", OPENDKIM_SNAP_NAME],
-                    timeout=100,
-                    check=False,
-                ).returncode
-                == 0
-            )
-
-            if not snap_installed:
-                subprocess.run(  # nosec
-                    ["snap", "install", OPENDKIM_SNAP_NAME],
-                    timeout=300,
-                    check=True,
-                )
-        except subprocess.CalledProcessError:
+            cache = snap.SnapCache()
+            opendkim_snap = cache[OPENDKIM_SNAP_NAME]
+            if not opendkim_snap.present:
+                opendkim_snap.ensure(snap.SnapState.Latest, channel="stable")
+        except snap.SnapError:
             logger.exception("An exception occurred when installing OpenDKIM snap")
             self.unit.status = ops.BlockedStatus("Unable to install OpenDKIM snap")
             return False
@@ -288,19 +277,19 @@ class OpenDKIMCharm(ops.CharmBase):
 
 
 def validate_opendkim() -> None:
-    """Validate the opendkim configuration using opendkim check mode.
+    """Validate the opendkim configuration using opendkim-testkey.
 
     Raises:
        InvalidCharmConfigError: Raised if the check failed.
     """
     try:
         subprocess.run(  # nosec
-            ["opendkim", "-n", "-x", str(OPENDKIM_CONFIG_PATH)],
+            ["opendkim.testkey", "-x", str(OPENDKIM_CONFIG_PATH), "-vv"],
             timeout=100,
             check=True,
         )
     except (subprocess.CalledProcessError, TimeoutError) as exc:
-        logger.exception("Error validating with opendkim -n")
+        logger.exception("Error validating with opendkim.testkey")
         raise InvalidCharmConfigError("Wrong opendkim configuration. See logs") from exc
 
 

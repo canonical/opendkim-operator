@@ -26,9 +26,12 @@ def test_install(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     act: Run install hook.
     assert: OpenDKIM and Telegraf snaps were installed and the unit is waiting.
     """
-    subprocess_run_mock = MagicMock()
-    subprocess_run_mock.side_effect = [MagicMock(returncode=1), MagicMock()]
-    monkeypatch.setattr("charm.subprocess.run", subprocess_run_mock)
+    # Mock SnapCache for opendkim snap
+    opendkim_snap_mock = MagicMock()
+    opendkim_snap_mock.present = False
+    snap_cache_mock = MagicMock()
+    snap_cache_mock.__getitem__.return_value = opendkim_snap_mock
+    monkeypatch.setattr("charm.snap.SnapCache", MagicMock(return_value=snap_cache_mock))
 
     telegraf_snap_mock = MagicMock()
     snap_add_mock = MagicMock(return_value=telegraf_snap_mock)
@@ -58,17 +61,7 @@ def test_install(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     telegraf_snap_mock.restart.assert_called_once()
 
     # OpenDKIM snap installation from store
-    assert subprocess_run_mock.call_count == 2
-    subprocess_run_mock.assert_any_call(
-        ["snap", "list", "opendkim"],
-        timeout=100,
-        check=False,
-    )
-    subprocess_run_mock.assert_any_call(
-        ["snap", "install", "opendkim"],
-        timeout=300,
-        check=True,
-    )
+    opendkim_snap_mock.ensure.assert_called_once()
 
 
 @pytest.mark.parametrize(
