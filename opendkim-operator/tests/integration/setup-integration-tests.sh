@@ -9,5 +9,5 @@ set -euxo pipefail
 REPO_ROOT="$(cd "$(dirname "$0")/../../.." && pwd)"
 sudo snap install snapcraft --classic
 (cd "${REPO_ROOT}/opendkim-snap" && snapcraft pack)
-sudo snapcraft install "${REPO_ROOT}/opendkim-snap/opendkim_*.snap" --dangerous
+sudo snap install "${REPO_ROOT}/opendkim-snap/opendkim_*.snap" --dangerous
 sudo docker run --rm -d -p 1080:1080 -p 25:1025 sj26/mailcatcher
