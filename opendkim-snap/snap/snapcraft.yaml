@@ -11,7 +11,7 @@ description: |
   signs outgoing email with a private key and verifies incoming email signatures
   against published DNS records, helping to authenticate the origin of messages
   and protect against spoofing.
-grade: devel
+grade: stable
 confinement: strict
 
 platforms:
