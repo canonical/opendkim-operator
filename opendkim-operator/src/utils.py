@@ -80,12 +80,7 @@ def write_file(path: Path, content: str, mode: int, user: str) -> None:
             file using chmod (e.g. 0o640).
         user: The user that will own the file.
     """
-    path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(content, encoding="utf-8")
     os.chmod(path, mode)
-    try:
-        u = pwd.getpwnam(user)
-    except KeyError:
-        # Fallback to root if user does not exist (e.g., opendkim snap not yet installed).
-        u = pwd.getpwnam("root")
+    u = pwd.getpwnam(user)
     os.chown(path, uid=u.pw_uid, gid=u.pw_gid)
