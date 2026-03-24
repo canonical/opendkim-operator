@@ -78,18 +78,15 @@ def _replace_snap_on_unit(juju: jubilant.Juju, app_name: str) -> None:
     for unit_name, unit in status.apps[app_name].units.items():
         machine = unit.machine
         # Copy snap to the machine
-        juju.cli("scp", str(snap_path), f"{unit_name}:/tmp/{snap_name}")
+        juju.scp(snap_path, f"{unit_name}:/tmp/{snap_name}")
         # Install with --dangerous, replacing the store version
-        juju.cli(
-            "exec",
-            "--unit",
-            unit_name,
-            "--",
+        juju.exec(
             "sudo",
             "snap",
             "install",
             "--dangerous",
             f"/tmp/{snap_name}",  # nosec B108 — Juju copies resources to /tmp
+            unit=unit_name,
         )
         logger.info("Replaced opendkim snap on unit %s (machine %s)", unit_name, machine)
 
