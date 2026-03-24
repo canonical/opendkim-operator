@@ -3,7 +3,6 @@
 
 """Fixtures for charm integration tests."""
 
-import glob
 import logging
 import pathlib
 import typing
@@ -14,7 +13,7 @@ import pytest
 
 logger = logging.getLogger(__name__)
 
-OPENDKIM_SNAP_DIR = pathlib.Path(__file__).resolve().parents[2] / ".." / "opendkim-snap"
+OPENDKIM_SNAP_DIR = pathlib.Path(__file__).resolve().parents[3] / "opendkim-snap"
 
 
 @pytest.fixture(scope="module", name="opendkim_charm")
@@ -64,7 +63,7 @@ def _replace_snap_on_unit(juju: jubilant.Juju, app_name: str) -> None:
         juju: The Juju client.
         app_name: The application name.
     """
-    snap_files = sorted(glob.glob(str(OPENDKIM_SNAP_DIR / "opendkim_*.snap")))
+    snap_files = sorted(OPENDKIM_SNAP_DIR.glob("opendkim_*.snap"))
     if not snap_files:
         logger.warning(
             "No locally-built opendkim snap found in %s; skipping replacement", OPENDKIM_SNAP_DIR

@@ -9,6 +9,7 @@ import logging
 import subprocess  # nosec B404
 import time
 import typing
+from enum import Enum, auto
 from pathlib import Path
 
 import ops
@@ -18,6 +19,15 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 import utils
 from state import OPENDKIM_MILTER_PORT, InvalidCharmConfigError, OpenDKIMConfig
+
+
+class RestartStrategy(Enum):
+    """Strategy for handling opendkim daemon restart/reload."""
+
+    NONE = auto()
+    RELOAD = auto()
+    RESTART = auto()
+
 
 logger = logging.getLogger(__name__)
 
@@ -91,9 +101,9 @@ class OpenDKIMCharm(ops.CharmBase):
         """
         try:
             cache = snap.SnapCache()
-            opendkim_snap = cache[OPENDKIM_SNAP_NAME]
-            if not opendkim_snap.present:
-                opendkim_snap.ensure(snap.SnapState.Latest, channel="stable")
+            self._opendkim_snap = cache[OPENDKIM_SNAP_NAME]
+            if not self._opendkim_snap.present:
+                self._opendkim_snap.ensure(snap.SnapState.Latest, channel="stable")
         except snap.SnapError:
             logger.exception("An exception occurred when installing OpenDKIM snap")
             self.unit.status = ops.BlockedStatus("Unable to install OpenDKIM snap")
@@ -142,41 +152,47 @@ class OpenDKIMCharm(ops.CharmBase):
             return
         self.unit.status = ops.ActiveStatus()
 
-    def _write_config_files(self, config: OpenDKIMConfig) -> bool:
+    def _write_config_files(self, config: OpenDKIMConfig) -> RestartStrategy:
         """Write all configuration files, comparing content to avoid unnecessary writes.
 
         Args:
             config: The validated OpenDKIM configuration.
 
         Returns:
-            True if any file was changed and a restart is needed.
+            The restart strategy: NONE if nothing changed, RELOAD if only keys
+            changed, or RESTART if the main config changed.
         """
-        should_restart = False
+        needs_config = False
+        needs_keys = False
 
         for keyname, keyvalue in config.private_keys.items():
             keyfile = OPENDKIM_KEYS_PATH / f"{keyname}.private"
             if keyvalue != utils.read_text(keyfile):
                 utils.write_file(keyfile, keyvalue, 0o600, user=OPENDKIM_USER)
-                should_restart = True
+                needs_keys = True
 
         signingtable_path = OPENDKIM_KEYS_PATH / config.signingtable_path.name
         signingtable = "\n".join(" ".join(row) for row in config.signingtable)
         if signingtable != utils.read_text(signingtable_path):
             utils.write_file(signingtable_path, signingtable, 0o644, user=OPENDKIM_USER)
-            should_restart = True
+            needs_keys = True
 
         keytable_path = OPENDKIM_KEYS_PATH / config.keytable_path.name
         keytable = "\n".join(" ".join(row) for row in config.keytable)
         if keytable != utils.read_text(keytable_path):
             utils.write_file(keytable_path, keytable, 0o644, user=OPENDKIM_USER)
-            should_restart = True
+            needs_keys = True
 
         rendered = self._render_opendkim_conf(config)
         if rendered != utils.read_text(OPENDKIM_CONFIG_PATH):
             utils.write_file(OPENDKIM_CONFIG_PATH, rendered, 0o644, user=OPENDKIM_USER)
-            should_restart = True
+            needs_config = True
 
-        return should_restart
+        if needs_config:
+            return RestartStrategy.RESTART
+        if needs_keys:
+            return RestartStrategy.RELOAD
+        return RestartStrategy.NONE
 
     @staticmethod
     def _render_opendkim_conf(config: OpenDKIMConfig) -> str:
@@ -224,35 +240,45 @@ class OpenDKIMCharm(ops.CharmBase):
                 return False
         return True
 
-    def _restart_if_needed(self, should_restart: bool) -> bool:
-        """Restart the opendkim snap daemon if needed and wait for readiness.
+    def _restart_if_needed(self, strategy: RestartStrategy) -> bool:
+        """Restart or reload the opendkim snap daemon if needed and wait for readiness.
 
         Args:
-            should_restart: Whether a restart is needed.
+            strategy: The restart strategy determined by _write_config_files.
 
         Returns:
-            True if no restart was needed or restart succeeded.
+            True if no action was needed or the operation succeeded.
         """
-        if not should_restart:
-            return True
-        try:
-            logger.info("Restart opendkim snap service")
-            subprocess.run(  # nosec
-                ["snap", "restart", "opendkim.daemon"],
-                timeout=100,
-                check=True,
-            )
-            if not self._wait_for_milter_ready():
-                logger.error("OpenDKIM milter endpoint did not become ready")
-                self.unit.status = ops.BlockedStatus("Unable to restart OpenDKIM service")
-                return False
-        except (subprocess.CalledProcessError, TimeoutError):
-            logger.exception("Error restarting opendkim daemon")
-            self.unit.status = ops.BlockedStatus("Unable to restart OpenDKIM service")
-            return False
+        match strategy:
+            case RestartStrategy.NONE:
+                return True
+            case RestartStrategy.RELOAD:
+                try:
+                    logger.info("Reload opendkim snap service")
+                    self._opendkim_snap.restart(reload=True)
+                    if not self._wait_for_milter_ready(timeout=10):
+                        logger.error("OpenDKIM milter endpoint did not become ready after reload")
+                        self.unit.status = ops.BlockedStatus("Unable to reload OpenDKIM service")
+                        return False
+                except snap.SnapError:
+                    logger.exception("Error reloading opendkim daemon")
+                    self.unit.status = ops.BlockedStatus("Unable to reload OpenDKIM service")
+                    return False
+            case RestartStrategy.RESTART:
+                try:
+                    logger.info("Restart opendkim snap service")
+                    self._opendkim_snap.restart()
+                    if not self._wait_for_milter_ready(timeout=10):
+                        logger.error("OpenDKIM milter endpoint did not become ready after restart")
+                        self.unit.status = ops.BlockedStatus("Unable to restart OpenDKIM service")
+                        return False
+                except snap.SnapError:
+                    logger.exception("Error restarting opendkim daemon")
+                    self.unit.status = ops.BlockedStatus("Unable to restart OpenDKIM service")
+                    return False
         return True
 
-    def _wait_for_milter_ready(self, timeout: int = 30) -> bool:
+    def _wait_for_milter_ready(self, timeout: int = 10) -> bool:
         """Wait until the OpenDKIM milter endpoint is listening on its TCP port.
 
         Args:
