@@ -3,6 +3,8 @@
 # See LICENSE file for licensing details.
 
 set -euxo pipefail
+sudo DEBIAN_FRONTEND=noninteractive apt-get -qq update
+sudo DEBIAN_FRONTEND=noninteractive apt-get -qq -y install opendkim-tools
 
 # Build the opendkim snap from source for integration testing
 # dirname $0 is opendkim-operator/tests/integration; go up 3 levels to the repo root
