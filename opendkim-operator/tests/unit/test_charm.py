@@ -183,7 +183,9 @@ def test_missing_milter_relation():
         ),
     ],
 )
-def test_correct_config(initial_opendkin_conf, restart_expected, base_state, tmp_path: Path, monkeypatch):
+def test_correct_config(
+    initial_opendkin_conf, restart_expected, base_state, tmp_path: Path, monkeypatch
+):
     """
     arrange: Mock all external accesses and prepare a valid configuration with a milter relation.
     act: Run install hook, then config_changed hook.
@@ -218,8 +220,10 @@ def test_correct_config(initial_opendkin_conf, restart_expected, base_state, tmp
     subprocess_run_mock = MagicMock(return_value=MagicMock(stdout="LISTEN"))
     monkeypatch.setattr("charm.subprocess.run", subprocess_run_mock)
     write_calls = []
+
     def write_file_mock(path, content, mode, user=None):
         write_calls.append((path, content, mode, user))
+
     monkeypatch.setattr("utils.write_file", write_file_mock)
 
     opendkim_snap_mock = MagicMock()
