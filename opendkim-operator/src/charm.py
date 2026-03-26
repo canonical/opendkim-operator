@@ -101,19 +101,28 @@ class OpenDKIMCharm(ops.CharmBase):
         """
         try:
             result = subprocess.run(  # nosec B603
-                ["snap", "list", OPENDKIM_SNAP_NAME],
+                ["/usr/bin/snap", "list", OPENDKIM_SNAP_NAME],
                 capture_output=True,
                 text=True,
             )
-            cache = snap.SnapCache()
-            self._opendkim_snap = cache[OPENDKIM_SNAP_NAME]
             if result.returncode != 0:
-                self._opendkim_snap.ensure(snap.SnapState.Latest, channel="stable")
+                opendkim_snap = self._get_opendkim_snap()
+                opendkim_snap.ensure(snap.SnapState.Latest, channel="stable")
         except snap.SnapError:
             logger.exception("An exception occurred when installing OpenDKIM snap")
             self.unit.status = ops.BlockedStatus("Unable to install OpenDKIM snap")
             return False
         return True
+
+    @staticmethod
+    def _get_opendkim_snap() -> snap.Snap:
+        """Return the opendkim snap from the snap cache.
+
+        Returns:
+            The opendkim Snap object.
+        """
+        cache = snap.SnapCache()
+        return cache[OPENDKIM_SNAP_NAME]
 
     def _install_telegraf(self) -> None:
         """Install telegraf."""
@@ -260,7 +269,7 @@ class OpenDKIMCharm(ops.CharmBase):
             case RestartStrategy.RELOAD:
                 try:
                     logger.info("Reload opendkim snap service")
-                    self._opendkim_snap.restart(reload=True)
+                    self._get_opendkim_snap().restart(reload=True)
                     if not self._wait_for_milter_ready(timeout=10):
                         logger.error("OpenDKIM milter endpoint did not become ready after reload")
                         self.unit.status = ops.BlockedStatus("Unable to reload OpenDKIM service")
@@ -272,7 +281,7 @@ class OpenDKIMCharm(ops.CharmBase):
             case RestartStrategy.RESTART:
                 try:
                     logger.info("Restart opendkim snap service")
-                    self._opendkim_snap.restart()
+                    self._get_opendkim_snap().restart()
                     if not self._wait_for_milter_ready(timeout=10):
                         logger.error("OpenDKIM milter endpoint did not become ready after restart")
                         self.unit.status = ops.BlockedStatus("Unable to restart OpenDKIM service")

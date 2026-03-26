@@ -6,7 +6,7 @@
 import getpass
 import json
 import os
-import subprocess
+import subprocess  # nosec B404
 import tempfile
 import typing
 from pathlib import Path
@@ -240,7 +240,9 @@ def test_correct_config(
 
     monkeypatch.setattr("charm.Path.exists", MagicMock(return_value=True))
 
-    OpenDKIMCharm._opendkim_snap = opendkim_snap_mock
+    snap_cache_mock = MagicMock()
+    snap_cache_mock.__getitem__ = MagicMock(return_value=opendkim_snap_mock)
+    monkeypatch.setattr("charm.snap.SnapCache", MagicMock(return_value=snap_cache_mock))
 
     context = ops.testing.Context(
         charm_type=OpenDKIMCharm,
