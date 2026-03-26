@@ -28,5 +28,9 @@ Mode {{ mode }}
 
 TrustAnchorFile /usr/share/dns/root.key
 
+{% if use_internalhosts_file %}
+InternalHosts file:{{ internalhosts_path }}
+{% else %}
 InternalHosts {{ internalhosts }}
+{% endif %}
 

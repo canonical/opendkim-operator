@@ -252,3 +252,75 @@ def test_metrics_configured(juju: jubilant.Juju, opendkim_app, smtp_relay_app, m
     ]
     for expected_metric in expected_metrics:
         assert expected_metric in metrics_output
+
+
+@pytest.mark.abort_on_fail
+def test_opendkim_verify_mode_with_trusted_sources(
+    juju: jubilant.Juju, opendkim_app, smtp_relay_app
+):
+    """
+    arrange: Deploy opendkim with valid signing config and trusted-sources set.
+    act: Configure opendkim with mode=sv and trusted-sources with specific networks.
+    assert: The internalhosts file is written with the correct entries and opendkim.conf
+        references it.
+    """
+    domain = "testrelay.internal"
+    selector = "default"
+    keyname = "testrelay-internal-default"
+    _, private_key = generate_opendkim_genkey(domain=domain, selector=selector)
+
+    try:
+        secret_id = juju.add_secret("opendkimsecret", {f"{keyname}": private_key})
+    except jubilant.CLIError as e:
+        secret_info = juju.show_secret("opendkimsecret")
+        secret_id = secret_info.uri
+        if "already exists" in e.stderr:
+            juju.update_secret(secret_id, {f"{keyname}": private_key})
+        else:
+            logger.error("Error adding secret %s %s", e.stderr, e.stdout)
+            raise e
+
+    juju.cli("grant-secret", secret_id, opendkim_app)
+    keytable = [
+        [f"{selector}._domainkey.{domain}", f"{domain}:{selector}:/etc/dkimkeys/{keyname}.private"]
+    ]
+    signingtable = [[f"*@{domain}", f"{selector}._domainkey.{domain}"]]
+    trusted_sources = "10.0.0.0/8, 192.168.1.0/24, 172.16.0.0/12"
+    juju.config(
+        opendkim_app,
+        {
+            "keytable": json.dumps(keytable),
+            "signingtable": json.dumps(signingtable),
+            "private-keys": secret_id,
+            "mode": "sv",
+            "trusted-sources": trusted_sources,
+        },
+    )
+
+    juju.config(smtp_relay_app, {"relay_domains": f"- {domain}"})
+    juju.wait(
+        lambda status: jubilant.all_active(status, opendkim_app, smtp_relay_app),
+        timeout=3 * 60,
+        delay=5,
+    )
+
+    # Verify the internalhosts file was written with the correct entries
+    status = juju.status()
+    opendkim_unit_name = next(iter(status.apps[opendkim_app].units))
+    internalhosts_task = juju.exec(
+        "cat /var/snap/opendkim/current/etc/dkimkeys/internalhosts", unit=opendkim_unit_name
+    )
+    internalhosts_content = internalhosts_task.stdout.strip()
+    assert "10.0.0.0/8" in internalhosts_content
+    assert "192.168.1.0/24" in internalhosts_content
+    assert "172.16.0.0/12" in internalhosts_content
+
+    # Verify opendkim.conf references the internalhosts file
+    opendkim_conf_task = juju.exec(
+        "cat /var/snap/opendkim/current/etc/opendkim.conf", unit=opendkim_unit_name
+    )
+    opendkim_conf_content = opendkim_conf_task.stdout
+    assert (
+        "InternalHosts file:/var/snap/opendkim/current/etc/dkimkeys/internalhosts"
+        in opendkim_conf_content
+    )

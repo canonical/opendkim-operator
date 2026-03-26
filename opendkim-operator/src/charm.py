@@ -180,6 +180,15 @@ class OpenDKIMCharm(ops.CharmBase):
             utils.write_file(keytable_path, keytable, 0o644, user=OPENDKIM_USER)
             should_restart = True
 
+        if config.use_internalhosts_file:
+            internalhosts_path = OPENDKIM_KEYS_PATH / config.internalhosts_path.name
+            internalhosts_content = "\n".join(config.trusted_sources)
+            if internalhosts_content != utils.read_text(internalhosts_path):
+                utils.write_file(
+                    internalhosts_path, internalhosts_content, 0o644, user=OPENDKIM_USER
+                )
+                should_restart = True
+
         rendered = self._render_opendkim_conf(config)
         if rendered != utils.read_text(OPENDKIM_CONFIG_PATH):
             utils.write_file(OPENDKIM_CONFIG_PATH, rendered, 0o644, user=OPENDKIM_USER)

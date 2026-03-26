@@ -282,6 +282,168 @@ def test_correct_config(initial_opendkin_conf, restart_expected, base_state, mon
         subprocess_run_mock.assert_not_called()
 
 
+@pytest.mark.parametrize(
+    "mode,golden_file",
+    [
+        pytest.param(
+            "v", "verify_trusted_sources_opendkim.conf", id="Verify mode with trusted sources"
+        ),
+        pytest.param("sv", "sv_trusted_sources_opendkim.conf", id="SV mode with trusted sources"),
+    ],
+)
+def test_trusted_sources_config(mode, golden_file, trusted_sources_state, monkeypatch):
+    """
+    arrange: Prepare a valid configuration with trusted-sources set.
+    act: Run hook config_changed.
+    assert: The internalhosts file is written with the correct entries and opendkim.conf
+        references it.
+    """
+    # All read_text calls return "" so every comparison triggers a write
+    read_text_mock = MagicMock(return_value="")
+    monkeypatch.setattr("utils.read_text", read_text_mock)
+    monkeypatch.setattr("charm.validate_opendkim", MagicMock(return_value=None))
+    subprocess_run_mock = MagicMock(return_value=MagicMock(stdout="LISTEN"))
+    monkeypatch.setattr("charm.subprocess.run", subprocess_run_mock)
+    write_file_mock = MagicMock()
+    monkeypatch.setattr("utils.write_file", write_file_mock)
+
+    # Mock key_path.exists() to return True for keytable validation
+    monkeypatch.setattr("charm.Path.exists", MagicMock(return_value=True))
+
+    trusted_sources_state["config"]["mode"] = mode
+
+    context = ops.testing.Context(
+        charm_type=OpenDKIMCharm,
+    )
+
+    state = ops.testing.State(**trusted_sources_state)
+    out = context.run(context.on.config_changed(), state)
+
+    assert out.unit_status.name == ops.testing.ActiveStatus.name
+
+    # 2 keys + signingtable + keytable + internalhosts + opendkim.conf = 6
+    assert write_file_mock.call_count == 6
+    subprocess_run_mock.assert_any_call(
+        ["snap", "restart", "opendkim.daemon"],
+        timeout=100,
+        check=True,
+    )
+
+    # Verify internalhosts file was written
+    write_file_mock.assert_any_call(
+        Path("/var/snap/opendkim/current/etc/dkimkeys/internalhosts"),
+        "10.0.0.0/8\n192.168.1.0/24",
+        0o644,
+        user="opendkim",
+    )
+
+    # Verify opendkim.conf matches golden file
+    write_file_mock.assert_any_call(
+        Path("/var/snap/opendkim/current/etc/opendkim.conf"),
+        (Path(__file__).parent / f"files/{golden_file}").read_text(),
+        0o644,
+        user="opendkim",
+    )
+
+
+def test_trusted_sources_no_restart_when_unchanged(trusted_sources_state, monkeypatch):
+    """
+    arrange: Prepare a valid configuration with trusted-sources where all files match.
+    act: Run hook config_changed.
+    assert: No files are written and no restart occurs.
+    """
+    signingtable_content = (Path(__file__).parent / "files/base_signingtable").read_text()
+    keytable_content = (Path(__file__).parent / "files/base_keytable").read_text()
+    opendkim_conf_content = (
+        Path(__file__).parent / "files/sv_trusted_sources_opendkim.conf"
+    ).read_text()
+    internalhosts_content = "10.0.0.0/8\n192.168.1.0/24"
+
+    def read_text_side_effect(path):
+        name = Path(path).name
+        if name == "key1.private":
+            return "PRIVATEKEY1"
+        if name == "key2.private":
+            return "PRIVATEKEY2"
+        if name == "signingtable":
+            return signingtable_content
+        if name == "keytable":
+            return keytable_content
+        if name == "internalhosts":
+            return internalhosts_content
+        if name == "opendkim.conf":
+            return opendkim_conf_content
+        return ""
+
+    read_text_mock = MagicMock(side_effect=read_text_side_effect)
+    monkeypatch.setattr("utils.read_text", read_text_mock)
+    monkeypatch.setattr("charm.validate_opendkim", MagicMock(return_value=None))
+    subprocess_run_mock = MagicMock(return_value=MagicMock(stdout="LISTEN"))
+    monkeypatch.setattr("charm.subprocess.run", subprocess_run_mock)
+    write_file_mock = MagicMock()
+    monkeypatch.setattr("utils.write_file", write_file_mock)
+
+    # Mock key_path.exists() to return True for keytable validation
+    monkeypatch.setattr("charm.Path.exists", MagicMock(return_value=True))
+
+    context = ops.testing.Context(
+        charm_type=OpenDKIMCharm,
+    )
+
+    state = ops.testing.State(**trusted_sources_state)
+    out = context.run(context.on.config_changed(), state)
+
+    assert out.unit_status.name == ops.testing.ActiveStatus.name
+    assert write_file_mock.call_count == 0
+    subprocess_run_mock.assert_not_called()
+
+
+def test_default_config_no_trusted_sources(base_state, monkeypatch):
+    """
+    arrange: Prepare a valid configuration without trusted-sources.
+    act: Run hook config_changed.
+    assert: No internalhosts file is written and opendkim.conf uses default InternalHosts.
+    """
+    # All read_text calls return "" so every comparison triggers a write
+    read_text_mock = MagicMock(return_value="")
+    monkeypatch.setattr("utils.read_text", read_text_mock)
+    monkeypatch.setattr("charm.validate_opendkim", MagicMock(return_value=None))
+    subprocess_run_mock = MagicMock(return_value=MagicMock(stdout="LISTEN"))
+    monkeypatch.setattr("charm.subprocess.run", subprocess_run_mock)
+    write_file_mock = MagicMock()
+    monkeypatch.setattr("utils.write_file", write_file_mock)
+
+    # Mock key_path.exists() to return True for keytable validation
+    monkeypatch.setattr("charm.Path.exists", MagicMock(return_value=True))
+
+    context = ops.testing.Context(
+        charm_type=OpenDKIMCharm,
+    )
+
+    state = ops.testing.State(**base_state)
+    out = context.run(context.on.config_changed(), state)
+
+    assert out.unit_status.name == ops.testing.ActiveStatus.name
+
+    # 2 keys + signingtable + keytable + opendkim.conf = 5 (no internalhosts)
+    assert write_file_mock.call_count == 5
+
+    # Verify opendkim.conf uses default InternalHosts (not file reference)
+    write_file_mock.assert_any_call(
+        Path("/var/snap/opendkim/current/etc/opendkim.conf"),
+        (Path(__file__).parent / "files/base_opendkim.conf").read_text(),
+        0o644,
+        user="opendkim",
+    )
+
+    # Verify internalhosts file was NOT written
+    internalhosts_path = Path("/var/snap/opendkim/current/etc/dkimkeys/internalhosts")
+    internalhosts_calls = [
+        c for c in write_file_mock.call_args_list if c[0][0] == internalhosts_path
+    ]
+    assert len(internalhosts_calls) == 0
+
+
 def test_write_file():
     """
     arrange: Prepare some text and a directory.

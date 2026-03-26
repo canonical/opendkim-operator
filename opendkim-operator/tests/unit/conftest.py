@@ -3,6 +3,7 @@
 
 """Fixtures for opendkim unit tests."""
 
+import copy
 import json
 import typing
 from secrets import token_hex
@@ -51,3 +52,12 @@ def base_state_fixture() -> dict[str, typing.Any]:
         "secrets": secrets,
         "relations": [milter_relation],
     }
+
+
+@pytest.fixture(scope="function", name="trusted_sources_state")
+def trusted_sources_state_fixture(base_state: dict[str, typing.Any]) -> dict[str, typing.Any]:
+    """Fixture for state with trusted-sources configured."""
+    state = copy.deepcopy(base_state)
+    state["config"]["trusted-sources"] = "10.0.0.0/8, 192.168.1.0/24"
+    state["config"]["mode"] = "sv"
+    return state
