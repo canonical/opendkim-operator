@@ -53,6 +53,18 @@ def deploy_opendkim_fixture(
     return deploy_opendkim_name
 
 
+def _configure_dns(juju: jubilant.Juju, unit_name: str) -> None:
+    """Configure DNS on the machine so opendkim.testkey can resolve DKIM TXT records.
+
+    Args:
+        juju: The Juju client.
+        unit_name: The unit name.
+    """
+    dns_setup = "echo 'nameserver 8.8.8.8' | sudo tee /etc/resolv.conf.tail > /dev/null && sudo chattr -i /etc/resolv.conf 2>/dev/null || true && sudo cat /etc/resolv.conf.tail >> /etc/resolv.conf || true"
+    juju.exec(dns_setup, unit=unit_name)
+    logger.info("Configured DNS on unit %s", unit_name)
+
+
 def _replace_snap_on_unit(juju: jubilant.Juju, app_name: str) -> None:
     """Replace the store-installed opendkim snap with the locally-built one.
 
@@ -77,6 +89,7 @@ def _replace_snap_on_unit(juju: jubilant.Juju, app_name: str) -> None:
     status = juju.status()
     for unit_name, unit in status.apps[app_name].units.items():
         machine = unit.machine
+        _configure_dns(juju, unit_name)
         # Copy snap to the machine
         juju.scp(snap_path, f"{unit_name}:/tmp/{snap_name}")
         # Install with --dangerous, replacing the store version
