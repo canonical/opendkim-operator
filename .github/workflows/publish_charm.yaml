@@ -8,8 +8,8 @@ on:
 
 jobs:
   publish-to-edge:
-    uses: canonical/operator-workflows/.github/workflows/publish_charm.yaml@main
+    uses: canonical/operator-workflows/.github/workflows/publish_charm.yaml@a93629faf3b31fc0a958fc7034325c9656c28af4
     secrets: inherit
     with:
       channel: 2/edge
-      working-directory: opendkim-operator
+      working-directory: ./opendkim-operator
