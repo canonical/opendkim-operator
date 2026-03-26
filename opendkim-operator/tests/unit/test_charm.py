@@ -6,6 +6,7 @@
 import getpass
 import json
 import os
+import subprocess  # nosec B404
 import tempfile
 import typing
 from pathlib import Path
@@ -22,12 +23,21 @@ from charm import OpenDKIMCharm
 
 def test_install(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     """
-    arrange: Mock apt.add_package and prepare a trivial context and state.
+    arrange: Mock snap installs and prepare a trivial context and state.
     act: Run install hook.
-    assert: Add package was called and the unit is active.
+    assert: OpenDKIM and Telegraf snaps were installed and the unit is waiting.
     """
-    add_package_mock = MagicMock()
-    monkeypatch.setattr("charm.apt.add_package", add_package_mock)
+    # Mock subprocess.run to simulate snap not present
+    subprocess_run_mock = MagicMock()
+    subprocess_run_mock.returncode = 1
+    monkeypatch.setattr(subprocess, "run", subprocess_run_mock)
+
+    # Mock SnapCache for opendkim snap
+    opendkim_snap_mock = MagicMock()
+    opendkim_snap_mock.present = False
+    snap_cache_mock = MagicMock()
+    snap_cache_mock.__getitem__.return_value = opendkim_snap_mock
+    monkeypatch.setattr("charm.snap.SnapCache", MagicMock(return_value=snap_cache_mock))
 
     telegraf_snap_mock = MagicMock()
     snap_add_mock = MagicMock(return_value=telegraf_snap_mock)
@@ -55,6 +65,9 @@ def test_install(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     snap_add_mock.assert_called_once_with(["telegraf"])
     write_file_mock.assert_has_calls([call(telegraf_conf, ANY, 0o644, user="root")])
     telegraf_snap_mock.restart.assert_called_once()
+
+    # OpenDKIM snap installation from store
+    opendkim_snap_mock.ensure.assert_called_once()
 
 
 @pytest.mark.parametrize(
@@ -176,20 +189,60 @@ def test_missing_milter_relation():
         ),
     ],
 )
-def test_correct_config(initial_opendkin_conf, restart_expected, base_state, monkeypatch):
+def test_correct_config(
+    initial_opendkin_conf, restart_expected, base_state, tmp_path: Path, monkeypatch
+):
     """
     arrange: Mock all external accesses and prepare a valid configuration with a milter relation.
-    act: Run hook config_changed.
-    assert: The charm is active. All the files were written and the service is restarted/reloaded.
+    act: Run install hook, then config_changed hook.
+    assert: The charm is active. Files are written and the service is restarted/reloaded via snap.
     """
-    monkeypatch.setattr("utils.read_text", MagicMock(return_value=initial_opendkin_conf))
+    if restart_expected:
+        read_text_mock = MagicMock(return_value="")
+    else:
+        signingtable_content = (Path(__file__).parent / "files/base_signingtable").read_text()
+        keytable_content = (Path(__file__).parent / "files/base_keytable").read_text()
+
+        def read_text_side_effect(path):
+            name = Path(path).name
+            match name:
+                case "key1.private":
+                    return "PRIVATEKEY1"
+                case "key2.private":
+                    return "PRIVATEKEY2"
+                case "signingtable":
+                    return signingtable_content
+                case "keytable":
+                    return keytable_content
+                case "opendkim.conf":
+                    return initial_opendkin_conf
+                case _:
+                    return ""
+
+        read_text_mock = MagicMock(side_effect=read_text_side_effect)
+
+    monkeypatch.setattr("utils.read_text", read_text_mock)
     monkeypatch.setattr("charm.validate_opendkim", MagicMock(return_value=None))
-    systemd_reload_mock = MagicMock()
-    monkeypatch.setattr("charm.systemd.service_reload", systemd_reload_mock)
-    systemd_restart_mock = MagicMock()
-    monkeypatch.setattr("charm.systemd.service_restart", systemd_restart_mock)
-    write_file_mock = MagicMock()
+    subprocess_run_mock = MagicMock(return_value=MagicMock(stdout="LISTEN"))
+    monkeypatch.setattr("charm.subprocess.run", subprocess_run_mock)
+    write_calls = []
+
+    def write_file_mock(path, content, mode, user=None):
+        write_calls.append((path, content, mode, user))
+
     monkeypatch.setattr("utils.write_file", write_file_mock)
+
+    opendkim_snap_mock = MagicMock()
+    telegraf_snap_mock = MagicMock()
+    monkeypatch.setattr(charm.snap, "add", MagicMock(return_value=telegraf_snap_mock))
+    telegraf_conf = tmp_path / "telegraf.conf"
+    monkeypatch.setattr(charm, "TELEGRAF_CONF_DST", telegraf_conf)
+
+    monkeypatch.setattr("charm.Path.exists", MagicMock(return_value=True))
+
+    snap_cache_mock = MagicMock()
+    snap_cache_mock.__getitem__ = MagicMock(return_value=opendkim_snap_mock)
+    monkeypatch.setattr("charm.snap.SnapCache", MagicMock(return_value=snap_cache_mock))
 
     context = ops.testing.Context(
         charm_type=OpenDKIMCharm,
@@ -201,37 +254,18 @@ def test_correct_config(initial_opendkin_conf, restart_expected, base_state, mon
     assert out.unit_status.name == ops.testing.ActiveStatus.name
     assert next(iter(out.relations)).local_unit_data["port"] == "8892"
 
-    systemd_reload_mock.assert_called_with("opendkim")
     if restart_expected:
-        assert write_file_mock.call_count == 5
-        systemd_restart_mock.assert_called_with("opendkim")
-        write_file_mock.assert_any_call(
-            Path("/etc/opendkim.conf"),
-            (Path(__file__).parent / "files/base_opendkim.conf").read_text(),
-            0o644,
-            user="opendkim",
-        )
+        assert len(write_calls) == 5
+        opendkim_snap_mock.restart.assert_called_once()
+        write_paths = {c[0] for c in write_calls}
+        assert Path("/var/snap/opendkim/current/etc/opendkim.conf") in write_paths
+        assert Path("/var/snap/opendkim/current/etc/dkimkeys/key1.private") in write_paths
+        assert Path("/var/snap/opendkim/current/etc/dkimkeys/key2.private") in write_paths
+        assert Path("/var/snap/opendkim/current/etc/dkimkeys/signingtable") in write_paths
+        assert Path("/var/snap/opendkim/current/etc/dkimkeys/keytable") in write_paths
     else:
-        assert write_file_mock.call_count == 4
-        systemd_restart_mock.assert_not_called()
-    write_file_mock.assert_any_call(
-        Path("/etc/dkimkeys/key1.private"), "PRIVATEKEY1", 0o600, user="opendkim"
-    )
-    write_file_mock.assert_any_call(
-        Path("/etc/dkimkeys/key2.private"), "PRIVATEKEY2", 0o600, user="opendkim"
-    )
-    write_file_mock.assert_any_call(
-        Path("/etc/dkimkeys/signingtable"),
-        (Path(__file__).parent / "files/base_signingtable").read_text(),
-        0o644,
-        user="opendkim",
-    )
-    write_file_mock.assert_any_call(
-        Path("/etc/dkimkeys/keytable"),
-        (Path(__file__).parent / "files/base_keytable").read_text(),
-        0o644,
-        user="opendkim",
-    )
+        assert len(write_calls) == 0, f"Unexpected write calls: {[str(c[0]) for c in write_calls]}"
+        opendkim_snap_mock.restart.assert_not_called()
 
 
 def test_write_file():

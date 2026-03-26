@@ -45,8 +45,6 @@ assumes:
   - juju >= 3.6
 
 charm-libs:
-  - lib: operator_libs_linux.systemd
-    version: "1"
   - lib: grafana_agent.cos_agent
     version: "0"
 

@@ -26,6 +26,11 @@ include Makefile.docs
 .PHONY: help 
 help: _list-targets ## Prints all available targets
 
+.PHONY: snap-smoke-tests
+snap-tests:
+	$(call msg,Testing the opendkim snap...)
+	cd opendkim-snap && snapcraft test
+
 .PHONY: _list-targets
 _list-targets: ## This collects and prints all targets, ignore internal commands
 	$(call msg,Available targets:)
