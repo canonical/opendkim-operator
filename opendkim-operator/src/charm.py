@@ -100,9 +100,14 @@ class OpenDKIMCharm(ops.CharmBase):
             True if the snap was installed successfully, False otherwise.
         """
         try:
+            result = subprocess.run(  # nosec B603
+                ["snap", "list", OPENDKIM_SNAP_NAME],
+                capture_output=True,
+                text=True,
+            )
             cache = snap.SnapCache()
             self._opendkim_snap = cache[OPENDKIM_SNAP_NAME]
-            if not self._opendkim_snap.present:
+            if result.returncode != 0:
                 self._opendkim_snap.ensure(snap.SnapState.Latest, channel="stable")
         except snap.SnapError:
             logger.exception("An exception occurred when installing OpenDKIM snap")

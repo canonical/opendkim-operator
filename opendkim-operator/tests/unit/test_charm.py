@@ -6,6 +6,7 @@
 import getpass
 import json
 import os
+import subprocess
 import tempfile
 import typing
 from pathlib import Path
@@ -26,6 +27,11 @@ def test_install(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     act: Run install hook.
     assert: OpenDKIM and Telegraf snaps were installed and the unit is waiting.
     """
+    # Mock subprocess.run to simulate snap not present
+    subprocess_run_mock = MagicMock()
+    subprocess_run_mock.returncode = 1
+    monkeypatch.setattr(subprocess, "run", subprocess_run_mock)
+
     # Mock SnapCache for opendkim snap
     opendkim_snap_mock = MagicMock()
     opendkim_snap_mock.present = False
