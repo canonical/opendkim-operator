@@ -17,6 +17,8 @@ on:
   push:
     branches:
       - main
+    paths:
+      - opendkim-snap/**
 
 jobs:
   build:
@@ -40,11 +42,11 @@ jobs:
 
   promote:
     name: Promote snap
-    if: ${{ inputs.promote-to != '' }}
-    needs: build
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.promote-to != '' }}
+    needs: [build, release-edge]
     uses: canonical/data-platform-workflows/.github/workflows/release_snap.yaml@v42.0.1
     with:
-      channel: ${{ inputs.promote-to }}
+      channel: ${{ github.event.inputs.promote-to }}
       artifact-prefix: ${{ needs.build.outputs.artifact-prefix }}
       path-to-snap-project-directory: ./opendkim-snap
       create-git-tags: false

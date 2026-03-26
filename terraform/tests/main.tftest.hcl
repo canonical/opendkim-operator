@@ -12,7 +12,7 @@ run "basic_deploy" {
     model_uuid = run.setup_tests.model_uuid
     channel    = "2/edge"
     # renovate: depName="opendkim"
-    revision = 1
+    revision = 9
   }
 
   assert {

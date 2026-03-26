@@ -3,7 +3,6 @@
 
 """Fixtures for charm integration tests."""
 
-import glob
 import logging
 import pathlib
 import typing
@@ -14,7 +13,7 @@ import pytest
 
 logger = logging.getLogger(__name__)
 
-OPENDKIM_SNAP_DIR = pathlib.Path(__file__).resolve().parents[2] / ".." / "opendkim-snap"
+OPENDKIM_SNAP_DIR = pathlib.Path(__file__).resolve().parents[3] / "opendkim-snap"
 
 
 @pytest.fixture(scope="module", name="opendkim_charm")
@@ -54,17 +53,29 @@ def deploy_opendkim_fixture(
     return deploy_opendkim_name
 
 
+def _configure_dns(juju: jubilant.Juju, unit_name: str) -> None:
+    """Configure DNS on the machine so opendkim.testkey can resolve DKIM TXT records.
+
+    Args:
+        juju: The Juju client.
+        unit_name: The unit name.
+    """
+    dns_setup = "echo 'nameserver 8.8.8.8' | sudo tee /etc/resolv.conf.tail > /dev/null && sudo chattr -i /etc/resolv.conf 2>/dev/null || true && sudo cat /etc/resolv.conf.tail >> /etc/resolv.conf || true"
+    juju.exec(dns_setup, unit=unit_name)
+    logger.info("Configured DNS on unit %s", unit_name)
+
+
 def _replace_snap_on_unit(juju: jubilant.Juju, app_name: str) -> None:
     """Replace the store-installed opendkim snap with the locally-built one.
 
     Finds the snap artifact built by setup-integration-tests.sh, copies it
-    to each unit's machine, and installs it with --dangerous --devmode.
+    to each unit's machine, and installs it with --dangerous.
 
     Args:
         juju: The Juju client.
         app_name: The application name.
     """
-    snap_files = sorted(glob.glob(str(OPENDKIM_SNAP_DIR / "opendkim_*.snap")))
+    snap_files = sorted(OPENDKIM_SNAP_DIR.glob("opendkim_*.snap"))
     if not snap_files:
         logger.warning(
             "No locally-built opendkim snap found in %s; skipping replacement", OPENDKIM_SNAP_DIR
@@ -72,26 +83,23 @@ def _replace_snap_on_unit(juju: jubilant.Juju, app_name: str) -> None:
         return
 
     snap_path = snap_files[-1]
-    snap_name = pathlib.Path(snap_path).name
+    snap_name = snap_path.name
     logger.info("Replacing opendkim snap on units with %s", snap_path)
 
     status = juju.status()
     for unit_name, unit in status.apps[app_name].units.items():
         machine = unit.machine
+        _configure_dns(juju, unit_name)
         # Copy snap to the machine
-        juju.cli("scp", snap_path, f"{unit_name}:/tmp/{snap_name}")
-        # Install with --dangerous --devmode, replacing the store version
-        juju.cli(
-            "exec",
-            "--unit",
-            unit_name,
-            "--",
+        juju.scp(snap_path, f"{unit_name}:/tmp/{snap_name}")
+        # Install with --dangerous, replacing the store version
+        juju.exec(
             "sudo",
             "snap",
             "install",
             "--dangerous",
-            "--devmode",
-            f"/tmp/{snap_name}",
+            f"/tmp/{snap_name}",  # nosec B108 — Juju copies resources to /tmp
+            unit=unit_name,
         )
         logger.info("Replaced opendkim snap on unit %s (machine %s)", unit_name, machine)
 

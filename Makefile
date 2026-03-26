@@ -27,9 +27,8 @@ include Makefile.docs
 help: _list-targets ## Prints all available targets
 
 .PHONY: snap-smoke-tests
-snap-smoke-tests: ## Build the opendkim snap and run spread smoke tests
-	$(call msg,Building and testing the opendkim snap...)
-	cd opendkim-snap && snapcraft pack
+snap-tests:
+	$(call msg,Testing the opendkim snap...)
 	cd opendkim-snap && snapcraft test
 
 .PHONY: _list-targets

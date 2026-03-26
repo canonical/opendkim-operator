@@ -66,6 +66,9 @@ restore_each() {
     true
 }
 
+# If you want to allocate LXD VMs from remotes other than
+# "ubuntu", such as "ubuntu-daily", this function should be
+# modified to point there.
 allocate_lxdvm() {
     name=$(echo "$SPREAD_SYSTEM" | tr '[:punct:]' -)
     system=$(echo "$SPREAD_SYSTEM" | tr / -)
@@ -92,6 +95,7 @@ allocate_lxdvm() {
     lxc exec "${VM_NAME}" -- bash -c "if [ -d /etc/ssh/sshd_config.d ]; then echo -e 'PermitRootLogin yes\nPasswordAuthentication yes' > /etc/ssh/sshd_config.d/00-spread.conf; fi"
     lxc exec "${VM_NAME}" -- bash -c "echo root:${SPREAD_PASSWORD} | sudo chpasswd || true"
 
+    # Print the instance address to stdout
     ADDR=""
     while [ -z "$ADDR" ]; do ADDR=$(lxc ls -f csv | grep "^${VM_NAME}" | cut -d"," -f3 | cut -d" " -f1); done
     echo "$ADDR" 1>&3
@@ -107,7 +111,6 @@ allocate_ci() {
         echo "This backend is intended to be used only in CI systems."
         exit 1
     fi
-    sudo cp /etc/ssh/sshd_config /etc/ssh/sshd_config.spread-bak
     sudo sed -i 's/^\s*#\?\s*\(PermitRootLogin\|PasswordAuthentication\)\>.*/\1 yes/' /etc/ssh/sshd_config
     if [ -d /etc/ssh/sshd_config.d ]; then echo -e 'PermitRootLogin yes\nPasswordAuthentication yes' | sudo tee /etc/ssh/sshd_config.d/00-spread.conf; fi
     sudo systemctl daemon-reload
@@ -115,17 +118,12 @@ allocate_ci() {
 
     echo "root:${SPREAD_PASSWORD}" | sudo chpasswd || true
 
+    # Print the instance address to stdout
     echo localhost >&3
 }
 
 discard_ci() {
-    if [ -f /etc/ssh/sshd_config.spread-bak ]; then
-        sudo mv /etc/ssh/sshd_config.spread-bak /etc/ssh/sshd_config
-        sudo rm -f /etc/ssh/sshd_config.d/00-spread.conf
-        sudo systemctl daemon-reload
-        sudo systemctl restart ssh
-    fi
-    sudo passwd -d root || true
+    true
 }
 
 allocate() {

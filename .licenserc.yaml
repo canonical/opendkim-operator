@@ -26,7 +26,7 @@ header:
   - '**/*.md.j2'
   - '**/lib/charms/**'
   - 'opendkim-operator/templates/opendkim.conf.j2'
+  - 'opendkim-snap/snap/local/opendkim.conf'
   - 'opendkim-operator/tests/unit/files/**'
   - '**/uv.lock'
-  - 'opendkim-snap/snap/hooks/**'
   comment: on-failure

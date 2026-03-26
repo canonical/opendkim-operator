@@ -11,7 +11,7 @@ description: |
   signs outgoing email with a private key and verifies incoming email signatures
   against published DNS records, helping to authenticate the origin of messages
   and protect against spoofing.
-grade: devel
+grade: stable
 confinement: strict
 
 platforms:
@@ -27,7 +27,7 @@ apps:
       - system-observe
 
   daemon:
-    command: usr/sbin/opendkim -f -x /var/snap/opendkim/current/etc/opendkim.conf
+    command: usr/sbin/opendkim -f -x /etc/opendkim.conf
     daemon: simple
     plugs:
       - network
@@ -82,25 +82,11 @@ parts:
       mkdir -p $CRAFT_PART_INSTALL/etc/dkimkeys
       mkdir -p $CRAFT_PART_INSTALL/run/opendkim
 
-      if [ ! -f $CRAFT_PART_INSTALL/etc/opendkim.conf ] && [ -f opendkim/opendkim.conf.sample ]; then
-        install -Dm644 opendkim/opendkim.conf.sample $CRAFT_PART_INSTALL/etc/opendkim.conf
-      fi
-
-      if [ ! -f $CRAFT_PART_INSTALL/etc/opendkim.conf ] && [ -f opendkim.conf.sample ]; then
-        install -Dm644 opendkim.conf.sample $CRAFT_PART_INSTALL/etc/opendkim.conf
-      fi
-
-      if [ -f $CRAFT_PART_INSTALL/etc/opendkim.conf ]; then
-        sed -i 's/^UserID.*/#UserID snap_daemon/' $CRAFT_PART_INSTALL/etc/opendkim.conf
-        sed -i 's/^UMask.*/UMask 002/' $CRAFT_PART_INSTALL/etc/opendkim.conf
-        sed -i 's|/run/opendkim|/var/snap/opendkim/current/run/opendkim|g' $CRAFT_PART_INSTALL/etc/opendkim.conf
-      fi
+      # Install curated default configuration (based on the Debian/Ubuntu
+      # opendkim package config, adapted for snap paths).
+      install -Dm644 $CRAFT_PROJECT_DIR/snap/local/opendkim.conf \
+        $CRAFT_PART_INSTALL/etc/opendkim.conf
 
       # Fix perl shebangs for tools
-      if [ -f $CRAFT_PART_INSTALL/usr/sbin/opendkim-genkey ]; then
-        sed -i 's|^#!/usr/bin/perl|#!/usr/bin/env perl|g' $CRAFT_PART_INSTALL/usr/sbin/opendkim-genkey
-      fi
-
-      if [ -f $CRAFT_PART_INSTALL/usr/sbin/opendkim-genstats ]; then
-        sed -i 's|^#!/usr/bin/perl|#!/usr/bin/env perl|g' $CRAFT_PART_INSTALL/usr/sbin/opendkim-genstats
-      fi
+      grep -rl '^#!/usr/bin/perl' $CRAFT_PART_INSTALL/usr/sbin/ | \
+        xargs -r sed -i 's|^#!/usr/bin/perl|#!/usr/bin/env perl|'

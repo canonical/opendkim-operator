@@ -10,16 +10,14 @@ backends:
       - ubuntu-24.04
 
 suites:
-  tests/spread/:
+  spread/general/:
     summary: Snap smoke and upstream-inspired behavior tests
-    environment:
-      SNAP_NAME: opendkim
     prepare-each: |
-      SNAP_FILE="${CRAFT_ARTIFACT:-}"
-      if [ -z "$SNAP_FILE" ]; then
-        echo "CRAFT_ARTIFACT is not set" >&2
-        exit 1
-      fi
-      snap install --dangerous --devmode "$SNAP_FILE"
+      snap install "$CRAFT_ARTIFACT" --dangerous --jailmode
     restore-each: |
-      snap remove --purge "$SNAP_NAME" || true
+      snap remove --purge opendkim || true
+
+exclude:
+  - .git
+
+kill-timeout: 1h
