@@ -44,7 +44,9 @@ class OpenDKIMConfig(BaseModel):
         signingtable: OpenDKIM SigningTable as a pair or values per line.
         keytable: OpenDKIM KeyTable as a pair or values per line. Uses refile.
         private_keys: Dict with the filename without extension as key and the private key as value.
+        trusted_sources: List of trusted networks/hosts that bypass DKIM verification.
         signing_mode: True if in signing model.
+        verify_mode: True if in verify model.
         signingtable_path: Path to the signingtable file.
         keytable_path:  to the keytable file.
     """
@@ -57,6 +59,7 @@ class OpenDKIMConfig(BaseModel):
     signingtable: list[typing.Tuple[str, str]]
     keytable: list[list[str]]
     private_keys: dict[str, str]
+    trusted_sources: list[str] = []
     signingtable_path: Path = OPENDKIM_SIGNINGTABLE_PATH
     keytable_path: Path = OPENDKIM_KEYTABLE_PATH
 
@@ -65,6 +68,12 @@ class OpenDKIMConfig(BaseModel):
     def signing_mode(self) -> bool:
         """Return True if the charm works in signing mode."""
         return "s" in self.mode
+
+    @computed_field  # type: ignore[misc]
+    @property
+    def verify_mode(self) -> bool:
+        """Return True if the charm works in verify mode."""
+        return "v" in self.mode
 
     @classmethod
     def from_charm(cls, config: ops.model.ConfigData, model: ops.model.Model) -> typing.Self:
@@ -95,6 +104,11 @@ class OpenDKIMConfig(BaseModel):
         if not private_keys_secret_id:
             errors.append("empty private-keys configuration")
 
+        mode = typing.cast(str, config.get("mode", "sv"))
+        trusted_sources = _parse_trusted_sources(
+            typing.cast(typing.Optional[str], config.get("trusted-sources"))
+        )
+
         if errors:
             raise InvalidCharmConfigError(" - ".join(errors))
 
@@ -102,7 +116,13 @@ class OpenDKIMConfig(BaseModel):
 
         private_keys = secret.get_content(refresh=True)
         try:
-            return cls(signingtable=signingtable, keytable=keytable, private_keys=private_keys)
+            return cls(
+                signingtable=signingtable,
+                keytable=keytable,
+                private_keys=private_keys,
+                mode=mode,
+                trusted_sources=trusted_sources,
+            )
         except ValidationError as exc:
             logger.error(str(exc))
             error_field_str = ",".join(f"{field}" for field in get_invalid_config_fields(exc))
@@ -119,6 +139,20 @@ def _parse_yaml_config_option(config_data: ops.model.ConfigData, config_name: st
     except yaml.YAMLError as exc:
         logger.exception("Failed loading %s", config_name)
         raise ValueError(f"wrong {config_name} format") from exc
+
+
+def _parse_trusted_sources(raw_value: typing.Optional[str]) -> list[str]:
+    """Parse a comma-separated list of trusted sources into a list of stripped entries.
+
+    Args:
+        raw_value: The raw comma-separated string from the charm config.
+
+    Returns:
+        A list of stripped, non-empty network/host strings.
+    """
+    if not raw_value or not raw_value.strip():
+        return []
+    return [entry.strip() for entry in raw_value.split(",") if entry.strip()]
 
 
 def get_invalid_config_fields(exc: ValidationError) -> list[str]:

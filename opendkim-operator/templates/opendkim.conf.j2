@@ -27,5 +27,9 @@ Mode {{ mode }}
 
 TrustAnchorFile /usr/share/dns/root.key
 
+{% if trusted_sources %}
+InternalHosts file:/var/snap/opendkim/current/etc/dkimkeys/internalhosts
+{% else %}
 InternalHosts {{ internalhosts }}
+{% endif %}
 

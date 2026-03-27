@@ -88,3 +88,11 @@ config:
         default is sv
 
         See http://www.opendkim.org/opendkim.conf.5.html
+    trusted-sources:
+      type: string
+      default: ""
+      description: |
+        Comma-separated list of trusted networks or hosts whose mail should
+        bypass DKIM verification. These are written to the InternalHosts file.
+        When empty (default), all hosts are trusted (InternalHosts 0.0.0.0/0).
+        Example: "10.0.0.0/8, 192.168.1.0/24, 172.16.0.0/12"

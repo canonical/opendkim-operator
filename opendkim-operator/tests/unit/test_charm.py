@@ -179,7 +179,7 @@ def test_missing_milter_relation():
 
 
 @pytest.mark.parametrize(
-    "initial_opendkin_conf,restart_expected",
+    "initial_opendkim_conf,restart_expected",
     [
         pytest.param("", True, id="Initial opendkim.conf empty, restart service"),
         pytest.param(
@@ -190,7 +190,7 @@ def test_missing_milter_relation():
     ],
 )
 def test_correct_config(
-    initial_opendkin_conf, restart_expected, base_state, tmp_path: Path, monkeypatch
+    initial_opendkim_conf, restart_expected, base_state, tmp_path: Path, monkeypatch
 ):
     """
     arrange: Mock all external accesses and prepare a valid configuration with a milter relation.
@@ -215,7 +215,7 @@ def test_correct_config(
                 case "keytable":
                     return keytable_content
                 case "opendkim.conf":
-                    return initial_opendkin_conf
+                    return initial_opendkim_conf
                 case _:
                     return ""
 
