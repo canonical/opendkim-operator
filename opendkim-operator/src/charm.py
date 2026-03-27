@@ -197,9 +197,9 @@ class OpenDKIMCharm(ops.CharmBase):
             utils.write_file(keytable_path, keytable, 0o644, user=OPENDKIM_USER)
             needs_keys = True
 
-        if config.use_internalhosts_file:
-            internalhosts_path = OPENDKIM_KEYS_PATH / config.internalhosts_path.name
+        if config.trusted_sources:
             internalhosts_content = "\n".join(config.trusted_sources)
+            internalhosts_path = OPENDKIM_KEYS_PATH / "internalhosts"
             if internalhosts_content != utils.read_text(internalhosts_path):
                 utils.write_file(
                     internalhosts_path, internalhosts_content, 0o644, user=OPENDKIM_USER

@@ -17,7 +17,6 @@ OPENDKIM_MILTER_PORT = 8892
 OPENDKIM_KEYS_PATH = Path("/var/snap/opendkim/current/etc/dkimkeys")
 OPENDKIM_SIGNINGTABLE_PATH = OPENDKIM_KEYS_PATH / "signingtable"
 OPENDKIM_KEYTABLE_PATH = OPENDKIM_KEYS_PATH / "keytable"
-OPENDKIM_INTERNALHOSTS_PATH = OPENDKIM_KEYS_PATH / "internalhosts"
 
 
 # https://datatracker.ietf.org/doc/html/rfc6376#section-5.4
@@ -48,10 +47,8 @@ class OpenDKIMConfig(BaseModel):
         trusted_sources: List of trusted networks/hosts that bypass DKIM verification.
         signing_mode: True if in signing model.
         verify_mode: True if in verify model.
-        use_internalhosts_file: True if trusted_sources is set and an internalhosts file is needed.
         signingtable_path: Path to the signingtable file.
         keytable_path:  to the keytable file.
-        internalhosts_path: Path to the internalhosts file.
     """
 
     canonicalization: str = "relaxed/relaxed"
@@ -65,7 +62,6 @@ class OpenDKIMConfig(BaseModel):
     trusted_sources: list[str] = []
     signingtable_path: Path = OPENDKIM_SIGNINGTABLE_PATH
     keytable_path: Path = OPENDKIM_KEYTABLE_PATH
-    internalhosts_path: Path = OPENDKIM_INTERNALHOSTS_PATH
 
     @computed_field  # type: ignore[misc]
     @property
@@ -78,16 +74,6 @@ class OpenDKIMConfig(BaseModel):
     def verify_mode(self) -> bool:
         """Return True if the charm works in verify mode."""
         return "v" in self.mode
-
-    @computed_field  # type: ignore[misc]
-    @property
-    def use_internalhosts_file(self) -> bool:
-        """Return True if trusted_sources is set and an internalhosts file should be used."""
-        # Technically we need the file when trusted_sources > 1
-        # but to avoid changing the source from inline
-        # to file when configs changes fixed it to file
-        # whenever there is a trusted_source ip
-        return len(self.trusted_sources) > 0
 
     @classmethod
     def from_charm(cls, config: ops.model.ConfigData, model: ops.model.Model) -> typing.Self:
