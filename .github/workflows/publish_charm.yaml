@@ -12,4 +12,4 @@ jobs:
     secrets: inherit
     with:
       channel: 2/edge
-      working-directory: opendkim-operator
+      working-directory: ./opendkim-operator
