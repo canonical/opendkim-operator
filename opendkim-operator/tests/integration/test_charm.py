@@ -272,9 +272,9 @@ def test_opendkim_verify_mode_with_trusted_sources(
     try:
         secret_id = juju.add_secret("opendkimsecret", {f"{keyname}": private_key})
     except jubilant.CLIError as e:
-        secret_info = juju.show_secret("opendkimsecret")
-        secret_id = secret_info.uri
         if "already exists" in e.stderr:
+            secret_info = juju.show_secret("opendkimsecret")
+            secret_id = secret_info.uri
             juju.update_secret(secret_id, {f"{keyname}": private_key})
         else:
             logger.error("Error adding secret %s %s", e.stderr, e.stdout)

@@ -13,10 +13,11 @@ from enum import Enum, auto
 from pathlib import Path
 
 import ops
-import utils
 from charmlibs import snap
 from charms.grafana_agent.v0.cos_agent import COSAgentProvider
 from jinja2 import Environment, FileSystemLoader, select_autoescape
+
+import utils
 from state import OPENDKIM_MILTER_PORT, InvalidCharmConfigError, OpenDKIMConfig
 
 

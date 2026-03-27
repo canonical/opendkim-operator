@@ -83,6 +83,10 @@ class OpenDKIMConfig(BaseModel):
     @property
     def use_internalhosts_file(self) -> bool:
         """Return True if trusted_sources is set and an internalhosts file should be used."""
+        # Technically we need the file when trusted_sources > 1
+        # but to avoid changing the source from inline
+        # to file when configs changes fixed it to file
+        # whenever there is a trusted_source ip
         return len(self.trusted_sources) > 0
 
     @classmethod
