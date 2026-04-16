@@ -41,12 +41,8 @@ def generate_opendkim_genkey(domain: str, selector: str) -> typing.Tuple[str, st
             cwd=tmpdirname,
         )
         # Two files should have been created, {selector}.txt and {selector}.private
-        txt_data = (
-            pathlib.Path(tmpdirname) / pathlib.Path(f"{selector}.txt")
-        ).read_text()
-        private_data = (
-            pathlib.Path(tmpdirname) / pathlib.Path(f"{selector}.private")
-        ).read_text()
+        txt_data = (pathlib.Path(tmpdirname) / pathlib.Path(f"{selector}.txt")).read_text()
+        private_data = (pathlib.Path(tmpdirname) / pathlib.Path(f"{selector}.private")).read_text()
         return txt_data, private_data
 
 
@@ -112,9 +108,7 @@ def test_opendkim_signed_message(
         log=False,
     )
 
-    command_to_put_domain = (
-        f"echo {machine_ip_address} {domain} | sudo tee -a /etc/hosts"
-    )
+    command_to_put_domain = f"echo {machine_ip_address} {domain} | sudo tee -a /etc/hosts"
     juju.exec(machine=int(unit.machine), command=command_to_put_domain, log=False)
 
     juju.config(smtp_relay_app, {"relay_domains": f"- {domain}"}, log=False)
@@ -146,22 +140,16 @@ This is my first message with Python."""
             break
         time.sleep(1)
     assert len(messages) == 1
-    message = requests.get(
-        f"{mailcatcher_url}/{messages[0]['id']}.source", timeout=5
-    ).text
+    message = requests.get(f"{mailcatcher_url}/{messages[0]['id']}.source", timeout=5).text
     logger.info("Message in mailcatcher: %s", message)
-    assert (
-        f"DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d={domain}" in message
-    )
+    assert f"DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d={domain}" in message
 
     # Clean up mailcatcher
     requests.delete(f"{mailcatcher_url}/{messages[0]['id']}", timeout=5)
 
 
 @pytest.mark.abort_on_fail
-def test_opendkim_testkey_failed_validation_(
-    juju: jubilant.Juju, opendkim_app, smtp_relay_app
-):
+def test_opendkim_testkey_failed_validation_(juju: jubilant.Juju, opendkim_app, smtp_relay_app):
     """
     arrange: Deploy opendkim and smtp-relay.
     act: OpenDKIM configuration is invalid as a key file is missing.
@@ -204,22 +192,17 @@ def test_opendkim_testkey_failed_validation_(
     juju.config(smtp_relay_app, {"relay_domains": f"- {domain}"}, log=False)
     juju.wait(
         lambda status: (
-            status.apps[smtp_relay_app].is_active
-            and status.apps[opendkim_app].is_blocked
+            status.apps[smtp_relay_app].is_active and status.apps[opendkim_app].is_blocked
         ),
         timeout=3 * 60,
         delay=5,
     )
     status = juju.status()
-    assert (
-        "Wrong opendkim configuration" in status.apps[opendkim_app].app_status.message
-    )
+    assert "Wrong opendkim configuration" in status.apps[opendkim_app].app_status.message
 
 
 @pytest.mark.abort_on_fail
-def test_metrics_configured(
-    juju: jubilant.Juju, opendkim_app, smtp_relay_app, machine_ip_address
-):
+def test_metrics_configured(juju: jubilant.Juju, opendkim_app, smtp_relay_app, machine_ip_address):
     """
     arrange: Deploy opendkim.
     act: Get the metrics from the unit.
@@ -263,9 +246,7 @@ def test_metrics_configured(
         log=False,
     )
 
-    command_to_put_domain = (
-        f"echo {machine_ip_address} {domain} | sudo tee -a /etc/hosts"
-    )
+    command_to_put_domain = f"echo {machine_ip_address} {domain} | sudo tee -a /etc/hosts"
     juju.exec(machine=int(unit.machine), command=command_to_put_domain, log=False)
 
     juju.config(smtp_relay_app, {"relay_domains": f"- {domain}"}, log=False)

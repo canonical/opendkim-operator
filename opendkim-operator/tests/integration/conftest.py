@@ -100,9 +100,7 @@ def _replace_snap_on_unit(juju: jubilant.Juju, app_name: str) -> None:
             unit=unit_name,
             log=False,
         )
-        logger.info(
-            "Replaced opendkim snap on unit %s (machine %s)", unit_name, machine
-        )
+        logger.info("Replaced opendkim snap on unit %s (machine %s)", unit_name, machine)
 
 
 @pytest.fixture(scope="module", name="smtp_relay_app")
