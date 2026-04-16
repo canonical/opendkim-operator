@@ -41,8 +41,12 @@ def generate_opendkim_genkey(domain: str, selector: str) -> typing.Tuple[str, st
             cwd=tmpdirname,
         )
         # Two files should have been created, {selector}.txt and {selector}.private
-        txt_data = (pathlib.Path(tmpdirname) / pathlib.Path(f"{selector}.txt")).read_text()
-        private_data = (pathlib.Path(tmpdirname) / pathlib.Path(f"{selector}.private")).read_text()
+        txt_data = (
+            pathlib.Path(tmpdirname) / pathlib.Path(f"{selector}.txt")
+        ).read_text()
+        private_data = (
+            pathlib.Path(tmpdirname) / pathlib.Path(f"{selector}.private")
+        ).read_text()
         return txt_data, private_data
 
 
@@ -92,7 +96,10 @@ def test_opendkim_signed_message(
 
     juju.cli("grant-secret", secret_id, opendkim_app)
     keytable = [
-        [f"{selector}._domainkey.{domain}", f"{domain}:{selector}:/etc/dkimkeys/{keyname}.private"]
+        [
+            f"{selector}._domainkey.{domain}",
+            f"{domain}:{selector}:/etc/dkimkeys/{keyname}.private",
+        ]
     ]
     signingtable = [[f"*@{domain}", f"{selector}._domainkey.{domain}"]]
     juju.config(
@@ -102,12 +109,15 @@ def test_opendkim_signed_message(
             "signingtable": json.dumps(signingtable),
             "private-keys": secret_id,
         },
+        log=False,
     )
 
-    command_to_put_domain = f"echo {machine_ip_address} {domain} | sudo tee -a /etc/hosts"
-    juju.exec(machine=int(unit.machine), command=command_to_put_domain)
+    command_to_put_domain = (
+        f"echo {machine_ip_address} {domain} | sudo tee -a /etc/hosts"
+    )
+    juju.exec(machine=int(unit.machine), command=command_to_put_domain, log=False)
 
-    juju.config(smtp_relay_app, {"relay_domains": f"- {domain}"})
+    juju.config(smtp_relay_app, {"relay_domains": f"- {domain}"}, log=False)
     juju.wait(
         lambda status: jubilant.all_active(status, opendkim_app, smtp_relay_app),
         timeout=3 * 60,
@@ -136,16 +146,22 @@ This is my first message with Python."""
             break
         time.sleep(1)
     assert len(messages) == 1
-    message = requests.get(f"{mailcatcher_url}/{messages[0]['id']}.source", timeout=5).text
+    message = requests.get(
+        f"{mailcatcher_url}/{messages[0]['id']}.source", timeout=5
+    ).text
     logger.info("Message in mailcatcher: %s", message)
-    assert f"DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d={domain}" in message
+    assert (
+        f"DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d={domain}" in message
+    )
 
     # Clean up mailcatcher
     requests.delete(f"{mailcatcher_url}/{messages[0]['id']}", timeout=5)
 
 
 @pytest.mark.abort_on_fail
-def test_opendkim_testkey_failed_validation_(juju: jubilant.Juju, opendkim_app, smtp_relay_app):
+def test_opendkim_testkey_failed_validation_(
+    juju: jubilant.Juju, opendkim_app, smtp_relay_app
+):
     """
     arrange: Deploy opendkim and smtp-relay.
     act: OpenDKIM configuration is invalid as a key file is missing.
@@ -169,7 +185,10 @@ def test_opendkim_testkey_failed_validation_(juju: jubilant.Juju, opendkim_app, 
 
     juju.cli("grant-secret", secret_id, opendkim_app)
     keytable = [
-        [f"{selector}._domainkey.{domain}", f"{domain}:{selector}:/etc/dkimkeys/WRONGNAME.private"]
+        [
+            f"{selector}._domainkey.{domain}",
+            f"{domain}:{selector}:/etc/dkimkeys/WRONGNAME.private",
+        ]
     ]
     signingtable = [[f"*@{domain}", f"{selector}._domainkey.{domain}"]]
     juju.config(
@@ -179,22 +198,28 @@ def test_opendkim_testkey_failed_validation_(juju: jubilant.Juju, opendkim_app, 
             "signingtable": json.dumps(signingtable),
             "private-keys": secret_id,
         },
+        log=False,
     )
 
-    juju.config(smtp_relay_app, {"relay_domains": f"- {domain}"})
+    juju.config(smtp_relay_app, {"relay_domains": f"- {domain}"}, log=False)
     juju.wait(
         lambda status: (
-            status.apps[smtp_relay_app].is_active and status.apps[opendkim_app].is_blocked
+            status.apps[smtp_relay_app].is_active
+            and status.apps[opendkim_app].is_blocked
         ),
         timeout=3 * 60,
         delay=5,
     )
     status = juju.status()
-    assert "Wrong opendkim configuration" in status.apps[opendkim_app].app_status.message
+    assert (
+        "Wrong opendkim configuration" in status.apps[opendkim_app].app_status.message
+    )
 
 
 @pytest.mark.abort_on_fail
-def test_metrics_configured(juju: jubilant.Juju, opendkim_app, smtp_relay_app, machine_ip_address):
+def test_metrics_configured(
+    juju: jubilant.Juju, opendkim_app, smtp_relay_app, machine_ip_address
+):
     """
     arrange: Deploy opendkim.
     act: Get the metrics from the unit.
@@ -222,7 +247,10 @@ def test_metrics_configured(juju: jubilant.Juju, opendkim_app, smtp_relay_app, m
 
     juju.cli("grant-secret", secret_id, opendkim_app)
     keytable = [
-        [f"{selector}._domainkey.{domain}", f"{domain}:{selector}:/etc/dkimkeys/{keyname}.private"]
+        [
+            f"{selector}._domainkey.{domain}",
+            f"{domain}:{selector}:/etc/dkimkeys/{keyname}.private",
+        ]
     ]
     signingtable = [[f"*@{domain}", f"{selector}._domainkey.{domain}"]]
     juju.config(
@@ -232,12 +260,15 @@ def test_metrics_configured(juju: jubilant.Juju, opendkim_app, smtp_relay_app, m
             "signingtable": json.dumps(signingtable),
             "private-keys": secret_id,
         },
+        log=False,
     )
 
-    command_to_put_domain = f"echo {machine_ip_address} {domain} | sudo tee -a /etc/hosts"
-    juju.exec(machine=int(unit.machine), command=command_to_put_domain)
+    command_to_put_domain = (
+        f"echo {machine_ip_address} {domain} | sudo tee -a /etc/hosts"
+    )
+    juju.exec(machine=int(unit.machine), command=command_to_put_domain, log=False)
 
-    juju.config(smtp_relay_app, {"relay_domains": f"- {domain}"})
+    juju.config(smtp_relay_app, {"relay_domains": f"- {domain}"}, log=False)
     juju.wait(
         lambda status: jubilant.all_active(status, opendkim_app, smtp_relay_app),
         timeout=3 * 60,
@@ -282,7 +313,10 @@ def test_opendkim_verify_mode_with_trusted_sources(
 
     juju.cli("grant-secret", secret_id, opendkim_app)
     keytable = [
-        [f"{selector}._domainkey.{domain}", f"{domain}:{selector}:/etc/dkimkeys/{keyname}.private"]
+        [
+            f"{selector}._domainkey.{domain}",
+            f"{domain}:{selector}:/etc/dkimkeys/{keyname}.private",
+        ]
     ]
     signingtable = [[f"*@{domain}", f"{selector}._domainkey.{domain}"]]
     trusted_sources = "10.0.0.0/8, 192.168.1.0/24, 172.16.0.0/12"
@@ -295,9 +329,10 @@ def test_opendkim_verify_mode_with_trusted_sources(
             "mode": "sv",
             "trusted-sources": trusted_sources,
         },
+        log=False,
     )
 
-    juju.config(smtp_relay_app, {"relay_domains": f"- {domain}"})
+    juju.config(smtp_relay_app, {"relay_domains": f"- {domain}"}, log=False)
     juju.wait(
         lambda status: jubilant.all_active(status, opendkim_app, smtp_relay_app),
         timeout=3 * 60,
@@ -308,7 +343,9 @@ def test_opendkim_verify_mode_with_trusted_sources(
     status = juju.status()
     opendkim_unit_name = next(iter(status.apps[opendkim_app].units))
     internalhosts_task = juju.exec(
-        "cat /var/snap/opendkim/current/etc/dkimkeys/internalhosts", unit=opendkim_unit_name
+        "cat /var/snap/opendkim/current/etc/dkimkeys/internalhosts",
+        unit=opendkim_unit_name,
+        log=False,
     )
     internalhosts_content = internalhosts_task.stdout.strip()
     assert "10.0.0.0/8" in internalhosts_content
@@ -317,7 +354,9 @@ def test_opendkim_verify_mode_with_trusted_sources(
 
     # Verify opendkim.conf references the internalhosts file
     opendkim_conf_task = juju.exec(
-        "cat /var/snap/opendkim/current/etc/opendkim.conf", unit=opendkim_unit_name
+        "cat /var/snap/opendkim/current/etc/opendkim.conf",
+        unit=opendkim_unit_name,
+        log=False,
     )
     opendkim_conf_content = opendkim_conf_task.stdout
     assert (

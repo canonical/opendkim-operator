@@ -35,10 +35,7 @@ def deploy_opendkim_fixture(
     deploy_opendkim_name = "opendkim"
 
     if not juju.status().apps.get(deploy_opendkim_name):
-        juju.deploy(
-            f"./{opendkim_charm}",
-            deploy_opendkim_name,
-        )
+        juju.deploy(f"./{opendkim_charm}", deploy_opendkim_name, log=False)
         # Wait for the charm to settle (blocked because not configured, or waiting).
         juju.wait(
             lambda status: (
@@ -61,7 +58,7 @@ def _configure_dns(juju: jubilant.Juju, unit_name: str) -> None:
         unit_name: The unit name.
     """
     dns_setup = "echo 'nameserver 8.8.8.8' | sudo tee /etc/resolv.conf.tail > /dev/null && sudo chattr -i /etc/resolv.conf 2>/dev/null || true && sudo cat /etc/resolv.conf.tail >> /etc/resolv.conf || true"
-    juju.exec(dns_setup, unit=unit_name)
+    juju.exec(dns_setup, unit=unit_name, log=False)
     logger.info("Configured DNS on unit %s", unit_name)
 
 
@@ -78,7 +75,8 @@ def _replace_snap_on_unit(juju: jubilant.Juju, app_name: str) -> None:
     snap_files = sorted(OPENDKIM_SNAP_DIR.glob("opendkim_*.snap"))
     if not snap_files:
         logger.warning(
-            "No locally-built opendkim snap found in %s; skipping replacement", OPENDKIM_SNAP_DIR
+            "No locally-built opendkim snap found in %s; skipping replacement",
+            OPENDKIM_SNAP_DIR,
         )
         return
 
@@ -100,8 +98,11 @@ def _replace_snap_on_unit(juju: jubilant.Juju, app_name: str) -> None:
             "--dangerous",
             f"/tmp/{snap_name}",  # nosec B108 — Juju copies resources to /tmp
             unit=unit_name,
+            log=False,
         )
-        logger.info("Replaced opendkim snap on unit %s (machine %s)", unit_name, machine)
+        logger.info(
+            "Replaced opendkim snap on unit %s (machine %s)", unit_name, machine
+        )
 
 
 @pytest.fixture(scope="module", name="smtp_relay_app")
@@ -113,7 +114,7 @@ def deploy_smtp_relay_fixture(
     smtp_relay_app_name = "smtp-relay"
 
     if not juju.status().apps.get(smtp_relay_app_name):
-        juju.deploy(smtp_relay_app_name, smtp_relay_app_name)
+        juju.deploy(smtp_relay_app_name, smtp_relay_app_name, log=False)
         juju.integrate(smtp_relay_app_name, opendkim_app)
         juju.wait(
             lambda status: (
@@ -126,7 +127,9 @@ def deploy_smtp_relay_fixture(
 
 
 @pytest.fixture(scope="session", name="juju")
-def juju_fixture(request: pytest.FixtureRequest) -> Generator[jubilant.Juju, None, None]:
+def juju_fixture(
+    request: pytest.FixtureRequest,
+) -> Generator[jubilant.Juju, None, None]:
     """Pytest fixture that wraps :meth:`jubilant.with_model`."""
 
     def _show_debug_log(juju: jubilant.Juju):
