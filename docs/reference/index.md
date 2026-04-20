@@ -27,3 +27,8 @@ integrations
 The following pages provide more details about the charm architecture,
 a high-level deployment with any required dependencies, and metrics.
 
+```{toctree}
+:maxdepth: 1
+charm-architecture
+metrics
+```
