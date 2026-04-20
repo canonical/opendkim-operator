@@ -22,21 +22,8 @@ configurations
 integrations
 ```
 
-## Architecture and deployments
-
-The following pages provide more details about the charm architecture and
-a high-level deployment with any required dependencies.
-
-```{toctree}
-:maxdepth: 1
-charm-architecture
-```
-
 ## Advanced topics
 
-The following page provides advanced-level topic on metrics.
+The following pages provide more details about the charm architecture,
+a high-level deployment with any required dependencies, and metrics.
 
-```{toctree}
-:maxdepth: 1
-metrics
-```
